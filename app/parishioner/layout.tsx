@@ -1,5 +1,3 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -15,13 +13,7 @@ export default function ParishionerLayout({
   return (
     <html lang="en">
       <body>
-        <SidebarProvider>
-          <AppSidebar />
-          <main>
-            <SidebarTrigger />
-            {children}
-          </main>
-        </SidebarProvider>
+        <main>{children}</main>
       </body>
     </html>
   );

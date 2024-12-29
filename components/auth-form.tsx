@@ -36,7 +36,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           const userData = userDoc.data();
           switch (userData.role) {
             case "parishioner":
-              router.push("/parishioner");
+              router.push("/parishioner/dashboard");
               break;
             case "admin":
               router.push("/admin");
