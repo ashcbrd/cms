@@ -204,6 +204,7 @@ const SetAppoinent = () => {
         setChildDateOfBirth(null);
         setGodMothers([{ firstName: "", lastName: "", contactNumber: "" }]);
         setGodFathers([{ firstName: "", lastName: "", contactNumber: "" }]);
+        router.push("/parishioner/appointments");
       } catch (err: any) {
         setError("Error adding appointment: " + err.message);
       }
