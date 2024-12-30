@@ -10,7 +10,6 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Check, X } from "lucide-react";
 
 interface AuthFormProps {
@@ -84,7 +83,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           setError("User data not found.");
         }
       } catch (err: any) {
-        setError(err.message);
+        setError("Invalid credentials. Please try again.");
       }
     } else {
       if (
@@ -115,9 +114,19 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
         };
         await setDoc(doc(db, "users", user.uid), userData);
         alert("Registered successfully");
-        router.push("/parishioner");
+        router.push("/parishioner/dashboard");
       } catch (err: any) {
-        setError(err.message);
+        if (err.code === "auth/email-already-in-use") {
+          setError("The email address is already in use by another account.");
+        } else if (err.code === "auth/invalid-email") {
+          setError("The email address is not valid.");
+        } else if (err.code === "auth/weak-password") {
+          setError(
+            "The password is too weak. Please choose a stronger password."
+          );
+        } else {
+          setError(err.message);
+        }
       }
     }
 
@@ -176,27 +185,19 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
             validatePassword(e.target.value);
           }}
         />
-        {/* <div
-          onClick={() => setShowPassword((prev) => !prev)}
-          className="flex items-center !cursor-pointer space-x-2 mt-4"
-        >
-          <Checkbox checked={showPassword} />
-          <label
-            htmlFor="show-password"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Show password
-          </label>
-        </div> */}
-        {password.length > 0 && (
+        {!isLogin && password.length > 0 && (
           <ul className="text-gray-600 text-sm mt-4">
             <li
               className={`flex gap-x-1 items-center ${
                 passwordValidation.length ? "text-green-500" : "text-red-500"
               }`}
             >
-              {passwordValidation.length ? <Check /> : <X size={16} />} At least
-              6 characters
+              {passwordValidation.length ? (
+                <Check size={16} />
+              ) : (
+                <X size={16} />
+              )}{" "}
+              At least 6 characters
             </li>
             <li
               className={`flex gap-x-1 items-center ${

@@ -23,7 +23,9 @@ const Navbar: React.FC = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Register</DialogTitle>
-              <DialogDescription></DialogDescription>
+              <DialogDescription>
+                Fill in the details below to create an account.
+              </DialogDescription>
             </DialogHeader>
             <AuthForm isLogin={false} />
           </DialogContent>
@@ -35,7 +37,9 @@ const Navbar: React.FC = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Log in</DialogTitle>
-              <DialogDescription></DialogDescription>
+              <DialogDescription>
+                Enter your credentials to access your account.
+              </DialogDescription>
             </DialogHeader>
             <AuthForm isLogin={true} />
           </DialogContent>
