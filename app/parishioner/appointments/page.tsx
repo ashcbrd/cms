@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { db } from "@/firebase"; // Adjust the path as necessary
+import { db } from "@/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import AppointmentCard from "@/components/appointment-card"; // Adjust the path as necessary
+import AppointmentCard from "@/components/appointment-card";
 
 interface Appointment {
   id: string;

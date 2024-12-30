@@ -30,7 +30,7 @@ const ParishionerNavbar = () => {
     lastName: string | null;
     email: string | null;
   } | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false); // State for controlling dialog open status
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const pathname = usePathname();
   const router = useRouter();

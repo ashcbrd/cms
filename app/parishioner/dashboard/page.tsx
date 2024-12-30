@@ -4,11 +4,10 @@ import React, { useEffect, useState } from "react";
 import { db } from "@/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css"; // Importing default styles
+import "react-calendar/dist/Calendar.css";
 import { auth } from "@/firebase";
 
-// Custom styles for the calendar to override default styles
-import "./custom-calendar.css"; // Assuming you create this file
+import "./custom-calendar.css";
 
 const DashboardPage: React.FC = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
