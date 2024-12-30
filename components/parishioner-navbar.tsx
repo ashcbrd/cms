@@ -5,7 +5,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/firebase";
 import { parishionerNavbarLinks } from "@/data/parishioner-navbar-links";
 import { doc, getDoc } from "firebase/firestore";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -22,7 +22,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 const ParishionerNavbar = () => {
@@ -34,6 +33,7 @@ const ParishionerNavbar = () => {
   const [dialogOpen, setDialogOpen] = useState(false); // State for controlling dialog open status
 
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -63,6 +63,7 @@ const ParishionerNavbar = () => {
       .then(() => {
         console.log("User signed out successfully");
         setDialogOpen(false);
+        router.push("/");
       })
       .catch((error) => {
         console.error("Error signing out: ", error);
