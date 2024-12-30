@@ -1,12 +1,29 @@
 "use client";
 
-import React from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import React, { useEffect, useState } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/firebase";
-import { useEffect, useState } from "react";
 import { parishionerNavbarLinks } from "@/data/parishioner-navbar-links";
 import { doc, getDoc } from "firebase/firestore";
 import { usePathname } from "next/navigation";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const ParishionerNavbar = () => {
   const [userDetails, setUserDetails] = useState<{
@@ -14,6 +31,7 @@ const ParishionerNavbar = () => {
     lastName: string | null;
     email: string | null;
   } | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false); // State for controlling dialog open status
 
   const pathname = usePathname();
 
@@ -40,23 +58,76 @@ const ParishionerNavbar = () => {
     return () => unsubscribe();
   }, []);
 
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        console.log("User signed out successfully");
+        setDialogOpen(false);
+      })
+      .catch((error) => {
+        console.error("Error signing out: ", error);
+      });
+  };
+
   return (
     <div className="p-x-10 h-full fixed w-[280px] p-10">
       <div>
         {userDetails ? (
           <div>
-            <div className="flex items-center gap-x-2">
-              <div className="min-w-10 text-white min-h-10 rounded-full flex items-center justify-center border border-[#bf6537] bg-primary">
-                {userDetails.firstName && userDetails.firstName[0]}
-                {userDetails.lastName && userDetails.lastName[0]}
-              </div>
-              <div>
-                <h2 className="w-max font-semibold">
-                  {userDetails.firstName} {userDetails.lastName}
-                </h2>
-                <p className="text-sm text-zinc-600">{userDetails.email}</p>
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <div className="flex items-center gap-x-2">
+                  <div className="min-w-10 text-white min-h-10 rounded-full flex items-center justify-center border border-[#bf6537] bg-primary">
+                    {userDetails.firstName && userDetails.firstName[0]}
+                    {userDetails.lastName && userDetails.lastName[0]}
+                  </div>
+                  <div>
+                    <h2 className="w-max font-semibold">
+                      {userDetails.firstName} {userDetails.lastName}
+                    </h2>
+                    <p className="text-sm text-zinc-600">{userDetails.email}</p>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Profile</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Edit Profile</DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="font-semibold cursor-pointer"
+                  onClick={() => setDialogOpen(true)}
+                >
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Are you sure you want to Log out?</DialogTitle>
+                  <DialogDescription>
+                    This will log you out of your account.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setDialogOpen(false)}
+                    className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-all mr-2"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 rounded-md bg-primary hover:bg-hover transition-all text-white"
+                  >
+                    Confirm Logout
+                  </button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         ) : (
           <p>Loading...</p>
@@ -69,7 +140,7 @@ const ParishionerNavbar = () => {
               <li key={index}>
                 <a
                   className={`flex gap-x-2 items-center hover:bg-zinc-100 w-full px-2 py-1 rounded-md ${
-                    isActive && "bg-accent"
+                    isActive ? "bg-accent" : ""
                   }`}
                   href={item.url}
                 >
