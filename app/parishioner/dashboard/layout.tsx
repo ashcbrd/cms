@@ -13,9 +13,9 @@ export default function ParishionerLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="flex gap-x-2 flex-row">
+      <body className="flex gap-x-2 flex-row w-full">
         <ParishionerNavbar />
-        <main className="ml-[280px] pr-10 py-10 w-full">{children}</main>
+        <main className="ml-[280px] pr-10 py-10">{children}</main>
       </body>
     </html>
   );
