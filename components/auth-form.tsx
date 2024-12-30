@@ -106,7 +106,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
         );
         const user = userCredential.user;
         const userData = {
-          uid: user.uid,
           email: user.email,
           firstName: firstName,
           lastName: lastName,
