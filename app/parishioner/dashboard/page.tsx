@@ -79,10 +79,10 @@ const DashboardPage: React.FC = () => {
             <h2 className="text-xl font-semibold">Confirmed Appointments</h2>
             <p>{confirmedAppointments}</p>
           </div>
-          <div className="col-span-full bg-white shadow-md rounded-md p-4">
+          <div className="col-span-full bg-white mt-6">
             <h2 className="text-xl font-semibold">Appointments Calendar</h2>
             <Calendar
-              className="my-calendar mt-10"
+              className="my-calendar mt-6"
               tileClassName={({ date }) =>
                 highlightedDates.some(
                   (highlighted) =>
