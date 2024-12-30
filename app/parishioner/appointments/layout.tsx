@@ -1,3 +1,4 @@
+import ParishionerNavbar from "@/components/parishioner-navbar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,8 +13,9 @@ export default function ParishionerLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <main>{children}</main>
+      <body className="flex gap-x-2 flex-row">
+        <ParishionerNavbar />
+        <main className="ml-[280px] pr-10 py-10">{children}</main>
       </body>
     </html>
   );

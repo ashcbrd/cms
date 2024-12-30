@@ -1,10 +1,14 @@
+import { LayoutDashboard, Calendar } from "lucide-react";
+
 export const parishionerNavbarLinks = [
   {
     label: "Dashboard",
-    url: "/dashboard",
+    url: "/parishioner/dashboard",
+    icon: LayoutDashboard,
   },
   {
     label: "Appointments",
-    url: "/appointments",
+    url: "/parishioner/appointments",
+    icon: Calendar,
   },
 ];

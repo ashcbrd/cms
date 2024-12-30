@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { appointmentTypeFormatter } from "@/lib/appointment-type-formatter";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { auth } from "@/firebase";
 
 const SetAppoinent = () => {
   const [appointmentType, setAppointmentType] = useState("");
@@ -123,11 +124,18 @@ const SetAppoinent = () => {
     setError("");
     setSuccessMessage("");
 
+    const userId = auth.currentUser ? auth.currentUser.uid : null;
+    if (!userId) {
+      setError("User not authenticated. Please log in to set an appointment.");
+      return;
+    }
+
     if (!appointmentType) {
       setError("Please select an appointment type");
     } else {
       try {
         await addDoc(collection(db, "appointments"), {
+          userId,
           appointmentType,
           status: "Pending",
 
@@ -1031,7 +1039,10 @@ const SetAppoinent = () => {
 
         <div className="flex items-center gap-x-4">
           <button
-            onClick={() => router.back()}
+            onClick={(e) => {
+              e.preventDefault();
+              router.back();
+            }}
             className="w-full p-2 rounded-md border border-primary text-primary hover:bg-primary/20"
           >
             Cancel
