@@ -6,6 +6,7 @@ import { auth, db } from "@/firebase";
 import { parishionerNavbarLinks } from "@/data/parishioner-navbar-links";
 import { doc, getDoc } from "firebase/firestore";
 import { usePathname, useRouter } from "next/navigation";
+import { BadgeAlert, BadgeCheck, BadgeHelp } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -70,40 +71,55 @@ const ParishionerNavbar = () => {
       });
   };
 
+  const verificationStatus = "pending";
+
   return (
     <div className="p-x-10 h-full fixed w-[280px] p-10 border-r border-gray-300/40">
       <div>
         {userDetails ? (
           <div>
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <div className="flex items-center gap-x-2">
-                  <div className="min-w-10 text-white min-h-10 rounded-full flex items-center justify-center border border-[#bf6537] bg-primary">
-                    {userDetails.firstName && userDetails.firstName[0]}
-                    {userDetails.lastName && userDetails.lastName[0]}
+            <div className="flex gap-x-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <div className="flex items-center gap-x-2">
+                    <div className="min-w-10 text-white min-h-10 rounded-full flex items-center justify-center border border-[#bf6537] bg-primary">
+                      {userDetails.firstName && userDetails.firstName[0]}
+                      {userDetails.lastName && userDetails.lastName[0]}
+                    </div>
+                    <div>
+                      <h2 className="w-max font-semibold">
+                        {userDetails.firstName} {userDetails.lastName}
+                      </h2>
+                      <p className="text-sm text-zinc-600 w-max">
+                        {userDetails.email}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="w-max font-semibold">
-                      {userDetails.firstName} {userDetails.lastName}
-                    </h2>
-                    <p className="text-sm text-zinc-600">{userDetails.email}</p>
-                  </div>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Profile</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Edit Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="font-semibold cursor-pointer"
-                  onClick={() => setDialogOpen(true)}
-                >
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>Profile</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Edit Profile</DropdownMenuItem>
+                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="font-semibold cursor-pointer"
+                    onClick={() => setDialogOpen(true)}
+                  >
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="translate-y-[3px]">
+                {verificationStatus === "verified" ? (
+                  <BadgeCheck size={18} color="green" />
+                ) : verificationStatus === "unverified" ? (
+                  <BadgeAlert size={18} color="gray" />
+                ) : (
+                  <BadgeHelp size={18} color="gold" />
+                )}
+              </div>
+            </div>
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogContent>

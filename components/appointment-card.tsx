@@ -26,9 +26,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment }) => {
           className={`px-2 py-1 text-white text-xs font-semibold rounded-lg
           
         ${
-          appointment.status === "confimed"
+          appointment.status === "Confirmed"
             ? "bg-green-500"
-            : appointment.status === "denied"
+            : appointment.status === "Denied"
             ? "bg-red-500"
             : "bg-yellow-500"
         }
