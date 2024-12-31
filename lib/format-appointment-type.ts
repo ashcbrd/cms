@@ -1,4 +1,4 @@
-export const appointmentTypeFormatter = (appointmentType: string) => {
+export function formatAppointmentType(appointmentType: string) {
   switch (appointmentType) {
     case "baptismal":
       return "Baptismal";
@@ -11,4 +11,4 @@ export const appointmentTypeFormatter = (appointmentType: string) => {
     case "houseBlessing":
       return "House Blessing";
   }
-};
+}

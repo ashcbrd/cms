@@ -63,19 +63,19 @@ const DashboardPage: React.FC = () => {
         <p>Loading...</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white shadow-md shadow-gray-400/10 border-[1px] border-gray-500/10 rounded-xl p-4">
+          <div className="bg-blue-100 shadow-md shadow-gray-400/10 border-[1px] border-gray-500/10 rounded-xl p-4">
             <h2 className="text-xl font-semibold">Total Appointments</h2>
             <p>{totalAppointments}</p>
           </div>
-          <div className="bg-white shadow-md shadow-gray-400/10 border-[1px] border-gray-500/10 rounded-xl p-4">
+          <div className="bg-yellow-100 shadow-md shadow-gray-400/10 border-[1px] border-gray-500/10 rounded-xl p-4">
             <h2 className="text-xl font-semibold">Pending Appointments</h2>
             <p>{pendingAppointments}</p>
           </div>
-          <div className="bg-white shadow-md shadow-gray-400/10 border-[1px] border-gray-500/10 rounded-xl p-4">
+          <div className="bg-red-100 shadow-md shadow-gray-400/10 border-[1px] border-gray-500/10 rounded-xl p-4">
             <h2 className="text-xl font-semibold">Denied Appointments</h2>
             <p>{deniedAppointments}</p>
           </div>
-          <div className="bg-white shadow-md shadow-gray-400/10 border-[1px] border-gray-500/10 rounded-xl p-4">
+          <div className="bg-green-100 shadow-md shadow-gray-400/10 border-[1px] border-gray-500/10 rounded-xl p-4">
             <h2 className="text-xl font-semibold">Confirmed Appointments</h2>
             <p>{confirmedAppointments}</p>
           </div>

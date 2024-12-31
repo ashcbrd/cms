@@ -82,7 +82,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
         } else {
           setError("User data not found.");
         }
-      } catch (err: any) {
+      } catch {
         setError("Invalid credentials. Please try again.");
       }
     } else {
@@ -109,7 +109,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           email: user.email,
           firstName: firstName,
           lastName: lastName,
-          role: "Parishioner",
+          role: "parishioner",
         };
         await setDoc(doc(db, "users", user.uid), userData);
         alert("Registered successfully");

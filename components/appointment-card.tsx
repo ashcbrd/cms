@@ -1,4 +1,5 @@
-import { appointmentTypeFormatter } from "@/lib/appointment-type-formatter";
+import { formatAppointmentType } from "@/lib/format-appointment-type";
+import { formatDate } from "@/lib/format-date";
 
 interface Appointment {
   appointmentType: string;
@@ -12,13 +13,37 @@ interface AppointmentCardProps {
 
 const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment }) => {
   return (
-    <div className="bg-white shadow-xl border border-gray-500/10 shadow-gray-300/10 rounded-lg p-4 mb-4">
-      <h3 className="text-lg font-bold">
-        {appointmentTypeFormatter(appointment.appointmentType)}
+    <div className="bg-white flex flex-col items-start gap-y-2 shadow-xl border border-gray-500/10 shadow-gray-300/10 rounded-lg p-4 mb-4 w-full">
+      <h3>
+        Type:{" "}
+        <span className="font-bold text-xl">
+          {formatAppointmentType(appointment.appointmentType)}
+        </span>
       </h3>
-      <p>Status: {appointment.status}</p>
+      <p className="flex items-center gap-x-[6px]">
+        Status:
+        <span
+          className={`px-2 py-1 text-white text-xs font-semibold rounded-lg
+          
+        ${
+          appointment.status === "confimed"
+            ? "bg-green-500"
+            : appointment.status === "denied"
+            ? "bg-red-500"
+            : "bg-yellow-500"
+        }
+          `}
+        >
+          {appointment.status}
+        </span>
+      </p>
       {appointment.date && (
-        <p>Date: {new Date(appointment.date).toLocaleDateString()}</p>
+        <p>
+          Date:{" "}
+          <span className="font-semibold">
+            {formatDate(new Date(appointment.date).toLocaleDateString())}
+          </span>
+        </p>
       )}
     </div>
   );

@@ -71,7 +71,7 @@ const ParishionerNavbar = () => {
   };
 
   return (
-    <div className="p-x-10 h-full fixed w-[280px] p-10">
+    <div className="p-x-10 h-full fixed w-[280px] p-10 border-r border-gray-300/40">
       <div>
         {userDetails ? (
           <div>
@@ -131,7 +131,13 @@ const ParishionerNavbar = () => {
             </Dialog>
           </div>
         ) : (
-          <p>Loading...</p>
+          <div className="flex items-center gap-x-2">
+            <div className="min-w-10 text-white min-h-10 rounded-full bg-gradient-to-tr from-zinc-300 via-zinc-100 to-zinc-300 opacity-30 animate-pulse" />
+            <div className="flex flex-col gap-y-2">
+              <div className="w-full h-4 bg-gradient-to-tr rounded-xl from-zinc-300 via-zinc-100 to-zinc-300 opacity-30 animate-pulse" />
+              <div className="h-3 w-[140px] rounded-xl bg-gradient-to-tr from-zinc-300 via-zinc-100 to-zinc-300 opacity-30 animate-pulse" />
+            </div>
+          </div>
         )}
         <ul className="mt-10 flex flex-col gap-y-4">
           {parishionerNavbarLinks.map((item, index) => {

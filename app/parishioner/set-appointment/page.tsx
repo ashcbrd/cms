@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-import { Trash2 } from "lucide-react";
+import { Trash2, Plus } from "lucide-react";
 
 import { Calendar } from "@/components/ui/calendar";
 import React, { useEffect, useState } from "react";
@@ -25,10 +25,18 @@ import { db } from "@/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { appointmentTypeFormatter } from "@/lib/appointment-type-formatter";
+import { formatAppointmentType } from "@/lib/format-appointment-type";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/firebase";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const SetAppoinent = () => {
   const [appointmentType, setAppointmentType] = useState("");
@@ -114,10 +122,74 @@ const SetAppoinent = () => {
   const [appointeeContactNumber, setAppointeeContactNumber] = useState("");
   const [houseAddress, setHouseAddress] = useState("");
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
   const router = useRouter();
+
+  const handleCancel = () => {
+    const isAnyFieldFilled =
+      childDateOfBirth ||
+      godMothers.some(
+        (mother) =>
+          mother.firstName.trim() !== "" ||
+          mother.lastName.trim() !== "" ||
+          mother.contactNumber.trim() !== ""
+      ) ||
+      godFathers.some(
+        (father) =>
+          father.firstName.trim() !== "" ||
+          father.lastName.trim() !== "" ||
+          father.contactNumber.trim() !== ""
+      ) ||
+      groomName.firstName.trim() !== "" ||
+      groomName.lastName.trim() !== "" ||
+      brideName.firstName.trim() !== "" ||
+      brideName.lastName.trim() !== "" ||
+      groomDateOfBirth ||
+      brideDateOfBirth ||
+      groomPlaceOfBirth.trim() !== "" ||
+      bridePlaceOfBirth.trim() !== "" ||
+      groomCitizenship.trim() !== "" ||
+      brideCitizenship.trim() !== "" ||
+      groomOccupation.trim() !== "" ||
+      brideOccupation.trim() !== "" ||
+      groomReligion.trim() !== "" ||
+      brideReligion.trim() !== "" ||
+      groomCivilStatus.trim() !== "" ||
+      brideCivilStatus.trim() !== "" ||
+      groomAddress.trim() !== "" ||
+      brideAddress.trim() !== "" ||
+      groomFather.firstName.trim() !== "" ||
+      groomFather.lastName.trim() !== "" ||
+      groomMother.firstName.trim() !== "" ||
+      groomMother.lastName.trim() !== "" ||
+      brideFather.firstName.trim() !== "" ||
+      brideFather.lastName.trim() !== "" ||
+      brideMother.firstName.trim() !== "" ||
+      brideMother.lastName.trim() !== "" ||
+      confirmantName.firstName.trim() !== "" ||
+      confirmantName.lastName.trim() !== "" ||
+      confirmantContactNumber.trim() !== "" ||
+      confirmantDateOfBirth ||
+      deceasedName.firstName.trim() !== "" ||
+      deceasedName.lastName.trim() !== "" ||
+      deceasedDateOfBirth ||
+      deceasedDateOfDeath ||
+      representativeContactNumber.trim() !== "" ||
+      appointeeName.firstName.trim() !== "" ||
+      appointeeName.lastName.trim() !== "" ||
+      appointeeContactNumber.trim() !== "" ||
+      houseAddress.trim() !== "";
+
+    if (!isAnyFieldFilled) {
+      router.back();
+    } else {
+      setDialogOpen(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -143,18 +215,22 @@ const SetAppoinent = () => {
 
           // Baptismal
           baptismal: {
-            childDateOfBirth: childDateOfBirth
-              ? childDateOfBirth.toISOString()
-              : null,
-            godMothers,
-            godFathers,
+            child: {
+              dateOfBirth: childDateOfBirth
+                ? childDateOfBirth.toISOString()
+                : null,
+              godMothers,
+              godFathers,
+            },
           },
 
           // Wedding
           wedding: {
             groom: {
               name: groomName,
-              dateOfBirth: groomDateOfBirth,
+              dateOfBirth: groomDateOfBirth
+                ? groomDateOfBirth.toISOString()
+                : null,
               placeOfBirth: groomPlaceOfBirth,
               citizenship: groomCitizenship,
               occupation: groomOccupation,
@@ -166,7 +242,9 @@ const SetAppoinent = () => {
             },
             bride: {
               name: brideName,
-              dateOfBirth: brideDateOfBirth,
+              dateOfBirth: brideDateOfBirth
+                ? brideDateOfBirth.toISOString()
+                : null,
               placeOfBirth: bridePlaceOfBirth,
               citizenship: brideCitizenship,
               occupation: brideOccupation,
@@ -182,7 +260,9 @@ const SetAppoinent = () => {
           confirmation: {
             confirmant: {
               name: confirmantName,
-              dateOfBirth: confirmantDateOfBirth,
+              dateOfBirth: confirmantDateOfBirth
+                ? confirmantDateOfBirth.toISOString()
+                : null,
               contactNumber: confirmantContactNumber,
             },
           },
@@ -191,9 +271,18 @@ const SetAppoinent = () => {
           burial: {
             deceased: {
               name: deceasedName,
-              dateOfBirth: deceasedDateOfBirth,
+              dateOfBirth: deceasedDateOfBirth
+                ? deceasedDateOfBirth.toISOString()
+                : null,
               dateOfDeath: deceasedDateOfDeath,
               representativeContactNumber,
+            },
+          },
+          houseBlessing: {
+            appointee: {
+              name: appointeeName,
+              houseAddress: houseAddress,
+              contactNumber: appointeeContactNumber,
             },
           },
         });
@@ -339,7 +428,7 @@ const SetAppoinent = () => {
                 }}
                 variant="outline"
               >
-                Add God Mother
+                <Plus /> Add God Mother
               </Button>
             </div>
             <div className="mb-4">
@@ -403,7 +492,7 @@ const SetAppoinent = () => {
                 }}
                 variant="outline"
               >
-                Add God Father
+                <Plus /> Add God Father
               </Button>
             </div>
           </>
@@ -953,14 +1042,14 @@ const SetAppoinent = () => {
     }
   };
 
-  useEffect(() => {
-    if (error || successMessage) {
-      setTimeout(() => {
-        setError(null);
-        setSuccessMessage(null);
-      }, 5000);
-    }
-  }, [error, successMessage]);
+  // useEffect(() => {
+  //   if (error || successMessage) {
+  //     setTimeout(() => {
+  //       setError(null);
+  //       setSuccessMessage(null);
+  //     }, 5000);
+  //   }
+  // }, [error, successMessage]);
 
   return (
     <div className="w-full h-full flex items-center justify-center py-20">
@@ -981,7 +1070,7 @@ const SetAppoinent = () => {
           <label className="block mb-2">Appointment Type:</label>
           <DropdownMenu>
             <DropdownMenuTrigger className="border text-start pl-4 py-1 rounded-md w-full">
-              {appointmentTypeFormatter(appointmentType) ||
+              {formatAppointmentType(appointmentType) ||
                 "Select Appointment Type"}
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -1042,7 +1131,7 @@ const SetAppoinent = () => {
           <button
             onClick={(e) => {
               e.preventDefault();
-              router.back();
+              handleCancel();
             }}
             className="w-full p-2 rounded-md border border-primary text-primary hover:bg-primary/20"
           >
@@ -1055,6 +1144,37 @@ const SetAppoinent = () => {
             Schedule Appointment
           </button>
         </div>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>You have unsaved changes.</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to leave this page without saving your
+                progress?
+              </DialogDescription>
+              <div className="flex gap-x-4 justify-end">
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setDialogOpen(false);
+                  }}
+                  variant="secondary"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    router.back();
+                  }}
+                  variant="default"
+                >
+                  Leave Page
+                </Button>
+              </div>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       </form>
     </div>
   );
