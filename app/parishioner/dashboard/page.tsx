@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { db } from "@/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { auth } from "@/firebase";
+import { onAuthStateChanged } from "firebase/auth"; // Add this
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { auth } from "@/firebase";
-
 import "./custom-calendar.css";
 
 const DashboardPage: React.FC = () => {
@@ -15,30 +15,45 @@ const DashboardPage: React.FC = () => {
   const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
 
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        if (auth.currentUser?.uid) {
-          const appointmentsQuery = query(
-            collection(db, "appointments"),
-            where("userId", "==", auth.currentUser.uid)
-          );
-
-          const snapshot = await getDocs(appointmentsQuery);
-          const appointmentsData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setAppointments(appointmentsData);
-        }
-      } catch (err) {
-        console.error("Error fetching appointments: ", err);
-      } finally {
-        setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log("User ID: ", user.uid);
+        await fetchAppointments(user.uid);
+      } else {
+        console.log("No user is signed in.");
+        setLoading(false); // Set loading to false if no user
       }
-    };
+    });
 
-    fetchAppointments();
+    return () => unsubscribe(); // Cleanup subscription on unmount
   }, []);
+
+  const fetchAppointments = async (userId: string) => {
+    setLoading(true);
+    try {
+      const appointmentsQuery = query(
+        collection(db, "appointments"),
+        where("userId", "==", userId)
+      );
+
+      const snapshot = await getDocs(appointmentsQuery);
+      const appointmentsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setAppointments(appointmentsData);
+      console.log("Fetched appointments:", appointmentsData);
+    } catch (err) {
+      console.error("Error fetching appointments: ", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const datesWithAppointments = appointments.map((app) => new Date(app.date));
+    setHighlightedDates(datesWithAppointments);
+  }, [appointments]);
 
   const totalAppointments = appointments.length;
   const pendingAppointments = appointments.filter(
@@ -50,11 +65,6 @@ const DashboardPage: React.FC = () => {
   const confirmedAppointments = appointments.filter(
     (app) => app.status === "Confirmed"
   ).length;
-
-  useEffect(() => {
-    const datesWithAppointments = appointments.map((app) => new Date(app.date));
-    setHighlightedDates(datesWithAppointments);
-  }, [appointments]);
 
   return (
     <div className="p-4">
