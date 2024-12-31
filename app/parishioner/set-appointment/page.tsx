@@ -1156,20 +1156,20 @@ const SetAppoinent = () => {
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    setDialogOpen(false);
+                    router.back();
                   }}
                   variant="secondary"
                 >
-                  Cancel
+                  Yes
                 </Button>
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    router.back();
+                    setDialogOpen(false);
                   }}
                   variant="default"
                 >
-                  Leave Page
+                  No
                 </Button>
               </div>
             </DialogHeader>
