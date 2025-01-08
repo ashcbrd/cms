@@ -11,6 +11,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Check, X } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface AuthFormProps {
   isLogin: boolean;
@@ -62,18 +63,33 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           switch (userData.role) {
             case "parishioner":
               router.push("/parishioner/dashboard");
+              toast({
+                title: "Logged in successfully",
+              });
               break;
             case "admin":
-              router.push("/admin");
+              router.push("/admin/dashboard");
+              toast({
+                title: "Logged in successfully",
+              });
               break;
             case "priest":
-              router.push("/priest");
+              router.push("/priest/dashboard");
+              toast({
+                title: "Logged in successfully",
+              });
               break;
             case "altarServer":
-              router.push("/altar-server");
+              router.push("/altar-server/dashboard");
+              toast({
+                title: "Logged in successfully",
+              });
               break;
             case "altarServerPresident":
-              router.push("/altar-server-president");
+              router.push("/altar-server-president/dashboard");
+              toast({
+                title: "Logged in successfully",
+              });
               break;
             default:
               alert("No matching role found, redirecting to home.");
@@ -112,7 +128,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           role: "parishioner",
         };
         await setDoc(doc(db, "users", user.uid), userData);
-        alert("Registered successfully");
+        toast({
+          title: "Registered successfully",
+        });
         router.push("/parishioner/dashboard");
       } catch (err: any) {
         if (err.code === "auth/email-already-in-use") {

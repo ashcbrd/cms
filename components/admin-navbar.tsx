@@ -3,10 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/firebase";
-import { parishionerNavbarLinks } from "@/data/navbar-links";
+import { adminNavbarLinks } from "@/data/navbar-links";
 import { doc, getDoc } from "firebase/firestore";
 import { usePathname, useRouter } from "next/navigation";
-import { BadgeAlert, BadgeCheck, BadgeHelp } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -25,7 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const ParishionerNavbar = () => {
+const AdminNavbar = () => {
   const [userDetails, setUserDetails] = useState<{
     firstName: string | null;
     lastName: string | null;
@@ -71,8 +70,6 @@ const ParishionerNavbar = () => {
       });
   };
 
-  const verificationStatus = "pending";
-
   return (
     <div className="p-x-10 h-full fixed w-[280px] p-10 border-r border-gray-300/40">
       <div>
@@ -110,15 +107,6 @@ const ParishionerNavbar = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <div className="translate-y-[3px]">
-                {verificationStatus === "verified" ? (
-                  <BadgeCheck size={18} color="green" />
-                ) : verificationStatus === "unverified" ? (
-                  <BadgeAlert size={18} color="gray" />
-                ) : (
-                  <BadgeHelp size={18} color="gold" />
-                )}
-              </div>
             </div>
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -156,7 +144,7 @@ const ParishionerNavbar = () => {
           </div>
         )}
         <ul className="mt-10 flex flex-col gap-y-4">
-          {parishionerNavbarLinks.map((item, index) => {
+          {adminNavbarLinks.map((item, index) => {
             const isActive = pathname === item.url;
 
             return (
@@ -178,4 +166,4 @@ const ParishionerNavbar = () => {
   );
 };
 
-export default ParishionerNavbar;
+export default AdminNavbar;
