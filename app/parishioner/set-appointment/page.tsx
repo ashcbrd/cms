@@ -22,7 +22,7 @@ import { Trash2, Plus } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import React, { useEffect, useState } from "react";
 import { db } from "@/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, setDoc, doc } from "firebase/firestore";
 import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatAppointmentType } from "@/lib/format-appointment-type";
@@ -206,11 +206,17 @@ const SetAppoinent = () => {
       setError("Please select an appointment type");
     } else {
       try {
-        await addDoc(collection(db, "appointments"), {
+        const appointmentRef = doc(collection(db, "appointments"));
+
+        await setDoc(appointmentRef, {
+          id: appointmentRef.id,
           userId,
+          priestId: "",
+          altarServerId: "",
+          altarServerPresidentId: "",
+
           appointmentType,
           status: "Pending",
-
           date: date ? date.toISOString() : null,
 
           // Baptismal
@@ -278,6 +284,7 @@ const SetAppoinent = () => {
               representativeContactNumber,
             },
           },
+
           houseBlessing: {
             appointee: {
               name: appointeeName,
@@ -1042,14 +1049,14 @@ const SetAppoinent = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (error || successMessage) {
-  //     setTimeout(() => {
-  //       setError(null);
-  //       setSuccessMessage(null);
-  //     }, 5000);
-  //   }
-  // }, [error, successMessage]);
+  useEffect(() => {
+    if (error || successMessage) {
+      setTimeout(() => {
+        setError(null);
+        setSuccessMessage(null);
+      }, 5000);
+    }
+  }, [error, successMessage]);
 
   return (
     <div className="w-full h-full flex items-center justify-center py-20">

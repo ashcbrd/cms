@@ -8,7 +8,7 @@ export function formatRole(role: string) {
       return "Priest";
     case "altarServerPresident":
       return "Altar Server President";
-    case "alterServer":
+    case "altarServer":
       return "Altar Server";
   }
 }

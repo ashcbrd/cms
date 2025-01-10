@@ -8,9 +8,9 @@ import {
   doc,
   updateDoc,
   addDoc,
-  deleteDoc, // Import deleteDoc function
+  deleteDoc,
 } from "firebase/firestore";
-import { db } from "@/firebase";
+import { db, auth } from "@/firebase";
 import {
   Dialog,
   DialogContent,
@@ -127,6 +127,19 @@ const ManageAccounts: React.FC = () => {
     setEditUser(null);
   };
 
+  const openAddUserDialog = () => {
+    setNewUser({
+      firstName: "",
+      lastName: "",
+      email: "",
+      address: "",
+      contactNumber: "",
+      role: "",
+    });
+    setEditUser(null);
+    setIsEditDialogOpen(true);
+  };
+
   const handleCreateUser = async () => {
     if (
       !newUser.firstName ||
@@ -154,10 +167,10 @@ const ManageAccounts: React.FC = () => {
   const handleDeleteUser = async () => {
     if (userToDelete) {
       const userRef = doc(db, "users", userToDelete.id);
-      await deleteDoc(userRef); // Delete the user
+      await deleteDoc(userRef);
       fetchUsers();
       setIsDeleteDialogOpen(false);
-      setUserToDelete(null); // Reset user to delete
+      setUserToDelete(null);
     }
   };
 
@@ -165,7 +178,7 @@ const ManageAccounts: React.FC = () => {
     const regex = new RegExp(`(${searchTerm})`, "gi");
     return text.split(regex).map((part, index) =>
       part.toLowerCase() === searchTerm.toLowerCase() ? (
-        <span key={index} className="font-semibold bg-yellow-500 text-white">
+        <span key={index} className="font-semibold bg-yellow-200">
           {part}
         </span>
       ) : (
@@ -186,7 +199,7 @@ const ManageAccounts: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogTrigger asChild>
+          <DialogTrigger asChild onClick={openAddUserDialog}>
             <Button className="flex items-center">
               <UserPlus /> Add User
             </Button>
@@ -199,6 +212,7 @@ const ManageAccounts: React.FC = () => {
               onSubmit={(e) => {
                 e.preventDefault();
                 editUser ? handleEditUser() : handleCreateUser();
+                setIsEditDialogOpen(false);
               }}
               className="w-full flex flex-col"
             >
@@ -318,48 +332,66 @@ const ManageAccounts: React.FC = () => {
                 </label>
                 <DropdownMenu>
                   <DropdownMenuTrigger className="border text-start pl-4 py-1 rounded-md w-full">
-                    {(editUser && formatRole(editUser.role)) || "Select Role"}
+                    {editUser
+                      ? formatRole(editUser.role)
+                      : formatRole(newUser.role) || "Select Role"}
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuLabel>Select Role</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() =>
-                        setEditUser((prev) => ({
-                          ...prev,
-                          role: "admin",
-                        }))
-                      }
+                      onClick={() => {
+                        if (editUser) {
+                          setEditUser((prev) => ({ ...prev, role: "admin" }));
+                        } else {
+                          setNewUser((prev) => ({ ...prev, role: "admin" }));
+                        }
+                      }}
                     >
                       Admin
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() =>
-                        setEditUser((prev) => ({
-                          ...prev,
-                          role: "priest",
-                        }))
-                      }
+                      onClick={() => {
+                        if (editUser) {
+                          setEditUser((prev) => ({ ...prev, role: "priest" }));
+                        } else {
+                          setNewUser((prev) => ({ ...prev, role: "priest" }));
+                        }
+                      }}
                     >
                       Priest
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() =>
-                        setEditUser((prev) => ({
-                          ...prev,
-                          role: "altarServerPresident",
-                        }))
-                      }
+                      onClick={() => {
+                        if (editUser) {
+                          setEditUser((prev) => ({
+                            ...prev,
+                            role: "altarServerPresident",
+                          }));
+                        } else {
+                          setNewUser((prev) => ({
+                            ...prev,
+                            role: "altarServerPresident",
+                          }));
+                        }
+                      }}
                     >
                       Altar Server President
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() =>
-                        setEditUser((prev) => ({
-                          ...prev,
-                          role: "altarServer",
-                        }))
-                      }
+                      onClick={() => {
+                        if (editUser) {
+                          setEditUser((prev) => ({
+                            ...prev,
+                            role: "altarServer",
+                          }));
+                        } else {
+                          setNewUser((prev) => ({
+                            ...prev,
+                            role: "altarServer",
+                          }));
+                        }
+                      }}
                     >
                       Altar Server
                     </DropdownMenuItem>
@@ -374,7 +406,6 @@ const ManageAccounts: React.FC = () => {
         </Dialog>
       </div>
       <div className="mb-4 flex gap-x-4 items-center">
-        {/* Role checkboxes here... */}
         <label className="mr-2 flex items-center gap-x-2">
           <Checkbox
             checked={selectedRoles.admin}
@@ -414,41 +445,50 @@ const ManageAccounts: React.FC = () => {
 
       <h2 className="text-2xl font-semibold mt-6">List of Users:</h2>
       <ul className="mt-4">
-        {filteredUsers.map((user) => (
-          <li
-            key={user.id}
-            className="border-b py-2 flex justify-between items-center"
-          >
-            <div>
-              {highlightText(
-                `${user.firstName} ${user.lastName} (${
-                  user.email
-                }) - Role: ${formatRole(user.role)}`
-              )}
-            </div>
-            <div className="flex items-center gap-x-2">
-              {user.role !== "parishioner" && (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => openEditDialog(user)}
-                  >
-                    <UserPen />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setUserToDelete(user);
-                      setIsDeleteDialogOpen(true);
-                    }}
-                  >
-                    <Trash />
-                  </Button>
-                </>
-              )}
-            </div>
-          </li>
-        ))}
+        {filteredUsers.map((user) => {
+          if (auth.currentUser) {
+            if (user.id === auth.currentUser.uid) {
+              return;
+            }
+          }
+          return (
+            <li
+              key={user.id}
+              className="border-b py-2 flex justify-between items-center"
+            >
+              <div>
+                {highlightText(
+                  `${user.firstName} ${user.lastName} (${user.email})`
+                )}{" "}
+                -{" "}
+                <span className="text-sm bg-gray-100 px-2 py-1 rounded-md">
+                  {highlightText(`${formatRole(user.role)}`)}
+                </span>
+              </div>
+              <div className="flex items-center gap-x-2">
+                {user.role !== "parishioner" && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => openEditDialog(user)}
+                    >
+                      <UserPen />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setUserToDelete(user);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash />
+                    </Button>
+                  </>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

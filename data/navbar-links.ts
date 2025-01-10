@@ -1,4 +1,10 @@
-import { LayoutDashboard, Calendar, UserCog, CalendarCog } from "lucide-react";
+import {
+  LayoutDashboard,
+  Calendar,
+  UserCog,
+  CalendarCog,
+  MessageSquareQuote,
+} from "lucide-react";
 
 export const parishionerNavbarLinks = [
   {
@@ -21,4 +27,14 @@ export const adminNavbarLinks = [
   },
   { label: "Manage Accounts", url: "/admin/manage-accounts", icon: UserCog },
   { label: "Manage Events", url: "/admin/manage-events", icon: CalendarCog },
+  {
+    label: "Manage Appointments",
+    url: "/admin/manage-appointments",
+    icon: CalendarCog,
+  },
+  {
+    label: "Parishioner Feedbacks",
+    url: "/admin/parishioner-feedbacks",
+    icon: MessageSquareQuote,
+  },
 ];

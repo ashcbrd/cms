@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Link from "next/link";
 
 const AdminNavbar = () => {
   const [userDetails, setUserDetails] = useState<{
@@ -71,7 +72,7 @@ const AdminNavbar = () => {
   };
 
   return (
-    <div className="p-x-10 h-full fixed w-[280px] p-10 border-r border-gray-300/40">
+    <div className="p-x-10 h-full fixed w-[300px] p-10 border-r border-gray-300/40">
       <div>
         {userDetails ? (
           <div>
@@ -96,8 +97,10 @@ const AdminNavbar = () => {
                 <DropdownMenuContent>
                   <DropdownMenuLabel>Profile</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Edit Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/admin/account-settings">Account Settings</Link>
+                  </DropdownMenuItem>
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="font-semibold cursor-pointer"
