@@ -38,3 +38,27 @@ export const adminNavbarLinks = [
     icon: MessageSquareQuote,
   },
 ];
+
+export const priestNavbarLinks = [
+  {
+    label: "Appointments",
+    url: "/altar-server/appointments",
+    icon: Calendar,
+  },
+];
+
+export const altarServerNavbarLinks = [
+  {
+    label: "Appointments",
+    url: "/altar-server/appointments",
+    icon: Calendar,
+  },
+];
+
+export const altarServerPresidentNavbarLinks = [
+  {
+    label: "Appointments",
+    url: "/altar-server/appointments",
+    icon: Calendar,
+  },
+];

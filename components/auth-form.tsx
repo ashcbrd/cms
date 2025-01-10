@@ -74,19 +74,19 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
               });
               break;
             case "priest":
-              router.push("/priest/dashboard");
+              router.push("/priest/appointments");
               toast({
                 title: "Logged in successfully",
               });
               break;
             case "altarServer":
-              router.push("/altar-server/dashboard");
+              router.push("/altar-server/appointments");
               toast({
                 title: "Logged in successfully",
               });
               break;
             case "altarServerPresident":
-              router.push("/altar-server-president/dashboard");
+              router.push("/altar-server-president/appointments");
               toast({
                 title: "Logged in successfully",
               });

@@ -21,11 +21,11 @@ const DashboardPage: React.FC = () => {
         await fetchAppointments(user.uid);
       } else {
         console.log("No user is signed in.");
-        setLoading(false); // Set loading to false if no user
+        setLoading(false);
       }
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   const fetchAppointments = async (userId: string) => {
