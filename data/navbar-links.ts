@@ -42,7 +42,7 @@ export const adminNavbarLinks = [
 export const priestNavbarLinks = [
   {
     label: "Appointments",
-    url: "/altar-server/appointments",
+    url: "/priest/appointments",
     icon: Calendar,
   },
 ];
@@ -58,7 +58,7 @@ export const altarServerNavbarLinks = [
 export const altarServerPresidentNavbarLinks = [
   {
     label: "Appointments",
-    url: "/altar-server/appointments",
+    url: "/altar-server-president/appointments",
     icon: Calendar,
   },
 ];

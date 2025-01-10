@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Link from "next/link";
 
 const PriestNavbar = () => {
   const [userDetails, setUserDetails] = useState<{
@@ -96,8 +97,12 @@ const PriestNavbar = () => {
                 <DropdownMenuContent>
                   <DropdownMenuLabel>Profile</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Edit Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
+
+                  <DropdownMenuItem>
+                    <Link href="/priest/account-settings">
+                      Account Settings
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="font-semibold cursor-pointer"
