@@ -141,7 +141,6 @@ export default function VerificationRequestsPage() {
         const verificationRef = doc(db, "verifications", currentRequestId);
         await updateDoc(verificationRef, { verificationStatus: "Unverified" });
 
-        // Update user verification status
         const request = verificationRequests.find(
           (req) => req.id === currentRequestId
         );
@@ -149,7 +148,7 @@ export default function VerificationRequestsPage() {
           await updateUserVerificationStatus(request.userId, "Unverified");
         }
 
-        await refetchVerificationRequests(); // Refresh the verification requests
+        await refetchVerificationRequests();
       } catch (error) {
         console.error("Error updating verification status: ", error);
       } finally {

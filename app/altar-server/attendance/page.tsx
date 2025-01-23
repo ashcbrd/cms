@@ -1,78 +1,127 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { db } from "@/firebase";
 import { collection, query, getDocs, doc, setDoc } from "firebase/firestore";
 import { auth } from "@/firebase";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { format, differenceInMinutes } from "date-fns";
 
 export default function AttendancePage() {
-  const [date, setDate] = useState<Date | null>(null);
+  const [attendances, setAttendances] = useState([]);
+  const [currentAttendanceId, setCurrentAttendanceId] = useState(null);
+  const [timeInModalOpen, setTimeInModalOpen] = useState(false);
+  const [timeOutModalOpen, setTimeOutModalOpen] = useState(false);
   const [timeIn, setTimeIn] = useState("");
   const [timeOut, setTimeOut] = useState("");
-  const [attendances, setAttendances] = useState([]);
-  const [timeFormatIn, setTimeFormatIn] = useState("AM");
-  const [timeFormatOut, setTimeFormatOut] = useState("AM");
+  const [hasCheckedIn, setHasCheckedIn] = useState(false);
+  const [hasCheckedOut, setHasCheckedOut] = useState(false);
 
   const attendanceCollectionRef = collection(db, "attendance");
-  const q = query(attendanceCollectionRef);
+
+  const getAttendances = useCallback(async () => {
+    try {
+      const q = query(attendanceCollectionRef);
+      const querySnapshot = await getDocs(q);
+      const attendancesArray = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setAttendances(attendancesArray);
+      const today = new Date().setHours(0, 0, 0, 0);
+      const todaysAttendance = attendancesArray.find(
+        (att) =>
+          new Date(att.date.seconds * 1000).setHours(0, 0, 0, 0) === today
+      );
+      if (todaysAttendance) {
+        setHasCheckedIn(!!todaysAttendance.timeIn);
+        setHasCheckedOut(!!todaysAttendance.timeOut);
+        if (todaysAttendance.timeIn) {
+          setCurrentAttendanceId(todaysAttendance.id);
+          setTimeIn(todaysAttendance.timeIn);
+        }
+        if (todaysAttendance.timeOut) {
+          setTimeOut(todaysAttendance.timeOut);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching attendance: ", error);
+    }
+  }, [attendanceCollectionRef]);
 
   useEffect(() => {
-    const getAttendances = async () => {
-      try {
-        const querySnapshot = await getDocs(q);
-        const attendancesArray = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setAttendances(attendancesArray);
-      } catch (error) {
-        console.error("Error fetching attendance: ", error);
-      }
-    };
     getAttendances();
-  }, [q]);
+  }, [getAttendances]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const parseTime = (timeString) => {
+    const [time, modifier] = timeString.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
 
+    if (modifier === "PM" && hours !== 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+
+    return { hours, minutes };
+  };
+
+  const handleTimeIn = async () => {
     const currentUser = auth.currentUser;
     if (!currentUser) {
       alert("Please log in to record your attendance.");
       return;
     }
 
-    if (timeIn && timeOut && date) {
-      try {
-        const attendanceRef = doc(attendanceCollectionRef);
-        await setDoc(attendanceRef, {
-          date: date,
-          timeIn: timeIn + " " + timeFormatIn,
-          timeOut: timeOut + " " + timeFormatOut,
-          userId: currentUser.uid,
-          attendanceId: attendanceRef.id,
-        });
+    const currentTime = new Date();
+    const formattedTimeIn = format(currentTime, "hh:mm a");
+    setTimeIn(formattedTimeIn);
 
-        setTimeIn("");
-        setTimeOut("");
-        setTimeFormatIn("AM");
-        setTimeFormatOut("PM");
-        setDate(null); // Reset date input
-      } catch (error) {
-        console.error("Error saving attendance: ", error);
-      }
-    } else {
-      alert("Please fill in all fields.");
+    try {
+      const attendanceRef = doc(attendanceCollectionRef);
+      await setDoc(attendanceRef, {
+        date: currentTime,
+        timeIn: formattedTimeIn,
+        userId: currentUser.uid,
+        attendanceId: attendanceRef.id,
+      });
+      setCurrentAttendanceId(attendanceRef.id);
+      setHasCheckedIn(true);
+      setTimeInModalOpen(false);
+      getAttendances();
+    } catch (error) {
+      console.error("Error saving time in: ", error.message, error);
+    }
+  };
+
+  const handleTimeOut = async () => {
+    const currentTime = new Date();
+    const formattedTimeOut = format(currentTime, "hh:mm a");
+    setTimeOut(formattedTimeOut);
+
+    try {
+      await setDoc(
+        doc(attendanceCollectionRef, currentAttendanceId),
+        {
+          timeOut: formattedTimeOut,
+        },
+        { merge: true }
+      );
+
+      const { hours: inHours, minutes: inMinutes } = parseTime(timeIn);
+      const timeInDate = new Date(currentTime);
+      timeInDate.setHours(inHours);
+      timeInDate.setMinutes(inMinutes);
+
+      setHasCheckedOut(true);
+      setTimeOutModalOpen(false);
+      getAttendances();
+    } catch (error) {
+      console.error("Error saving time out: ", error.message, error);
     }
   };
 
@@ -80,56 +129,106 @@ export default function AttendancePage() {
     <div className="mx-auto p-4 flex w-full gap-x-10">
       <div className="w-full">
         <h1 className="text-3xl font-bold mb-4">Your Attendance</h1>
-        <form onSubmit={handleSubmit} className="grid gap-y-4 mb-4">
-          <label className="label" htmlFor="date">
-            Date:
-          </label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+        <p>Today's Date: {format(new Date(), "PPP")}</p>
+        {!hasCheckedOut ? (
+          <div className="flex flex-col gap-y-2 mt-4">
+            <Dialog open={timeInModalOpen} onOpenChange={setTimeInModalOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  onClick={() => setTimeInModalOpen(true)}
+                  disabled={hasCheckedIn}
+                >
+                  Time In
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Confirm Time In</DialogTitle>
+                </DialogHeader>
+                <p>
+                  Your time in is:{" "}
+                  <span className="font-bold">
+                    {format(new Date(), "hh:mm a 'on' MMMM dd, yyyy")}
+                  </span>
+                </p>
+                <div className="mt-4 flex justify-end">
+                  <Button onClick={handleTimeIn}>Confirm</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
-          <div className="flex gap-x-4">
-            <div className="w-full">
-              <label htmlFor="timeIn">Time In (HH:MM):</label>
-              <Input
-                id="timeIn"
-                type="time"
-                value={timeIn}
-                onChange={(event) => setTimeIn(event.target.value)}
-              />
-            </div>
-            <div className="w-full">
-              <label htmlFor="timeOut">Time Out (HH:MM):</label>
-              <Input
-                id="timeOut"
-                type="time"
-                value={timeOut}
-                onChange={(event) => setTimeOut(event.target.value)}
-              />
-            </div>
+            <Dialog open={timeOutModalOpen} onOpenChange={setTimeOutModalOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  onClick={() => setTimeOutModalOpen(true)}
+                  disabled={!hasCheckedIn}
+                >
+                  Time Out
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Confirm Time Out</DialogTitle>
+                </DialogHeader>
+                <p>
+                  Your time out is:{" "}
+                  <span className="font-bold">
+                    {format(new Date(), "hh:mm a 'on' MMMM dd, yyyy")}
+                  </span>
+                </p>
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    onClick={handleTimeOut}
+                    disabled={!currentAttendanceId}
+                  >
+                    Confirm
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
+        ) : (
+          <div className="p-4 bg-zinc-50 border border-zinc-300 rounded mt-4">
+            <h2 className="text-lg font-bold">
+              Your attendance for today has been recorded.
+            </h2>
+            <p>Date: {format(new Date(), "PPP")}</p>
+            <p>Time In: {timeIn}</p>
+            <p>Time Out: {timeOut}</p>
+            <p>
+              Total Hours:{" "}
+              {attendances
+                .filter((att) => att.id === currentAttendanceId)
+                .map((attendance) => {
+                  const attendanceDate = attendance.date?.toDate();
+                  const { hours: inHours, minutes: inMinutes } = parseTime(
+                    attendance.timeIn || "00:00 AM"
+                  );
+                  const { hours: outHours, minutes: outMinutes } = parseTime(
+                    attendance.timeOut || "00:00 AM"
+                  );
 
-          <Button type="submit">Submit</Button>
-        </form>
+                  const timeInDate = new Date(attendanceDate);
+                  timeInDate.setHours(inHours);
+                  timeInDate.setMinutes(inMinutes);
+
+                  const timeOutDate = new Date(attendanceDate);
+                  timeOutDate.setHours(outHours);
+                  timeOutDate.setMinutes(outMinutes);
+
+                  const totalMinutes = differenceInMinutes(
+                    timeOutDate,
+                    timeInDate
+                  );
+                  const calculatedTotalHours =
+                    totalMinutes >= 0 ? totalMinutes / 60 : 0;
+                  return calculatedTotalHours.toFixed(2);
+                })}
+            </p>
+          </div>
+        )}
       </div>
       <div className="w-full">
         <h1 className="text-3xl font-bold mb-4">All Attendance</h1>
@@ -141,18 +240,49 @@ export default function AttendancePage() {
                   <th className="px-4 py-2">Date</th>
                   <th className="px-4 py-2">Time In</th>
                   <th className="px-4 py-2">Time Out</th>
+                  <th className="px-4 py-2">Total Hours</th>
                 </tr>
               </thead>
               <tbody>
                 {attendances.map((attendance) => {
                   const attendanceDate = attendance.date?.toDate();
+                  const timeIn = attendance.timeIn;
+                  const timeOut = attendance.timeOut;
+
+                  const { hours: inHours, minutes: inMinutes } = parseTime(
+                    timeIn || "00:00 AM"
+                  );
+                  const { hours: outHours, minutes: outMinutes } = parseTime(
+                    timeOut || "00:00 AM"
+                  );
+
+                  const timeInDate = new Date(attendanceDate);
+                  timeInDate.setHours(inHours);
+                  timeInDate.setMinutes(inMinutes);
+
+                  const timeOutDate = new Date(attendanceDate);
+                  timeOutDate.setHours(outHours);
+                  timeOutDate.setMinutes(outMinutes);
+
+                  const totalMinutes = differenceInMinutes(
+                    timeOutDate,
+                    timeInDate
+                  );
+                  const calculatedTotalHours =
+                    totalMinutes >= 0 ? totalMinutes / 60 : 0;
+
                   return (
                     <tr key={attendance.id}>
-                      <td className="border px-4 py-2">
+                      <td className="border px-4 py-2 text-center">
                         {attendanceDate ? format(attendanceDate, "PPP") : "N/A"}
                       </td>
-                      <td className="border px-4 py-2">{attendance.timeIn}</td>
-                      <td className="border px-4 py-2">{attendance.timeOut}</td>
+                      <td className="border px-4 py-2 text-center">{timeIn}</td>
+                      <td className="border px-4 py-2 text-center">
+                        {timeOut}
+                      </td>
+                      <td className="border px-4 py-2 text-center">
+                        {calculatedTotalHours.toFixed(2)}
+                      </td>
                     </tr>
                   );
                 })}
