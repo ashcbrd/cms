@@ -139,7 +139,7 @@ export default function AttendancePage() {
                   onClick={() => setTimeInModalOpen(true)}
                   disabled={hasCheckedIn}
                 >
-                  Time In
+                  {timeIn ? `You timed in at: ${timeIn}` : "Time in"}
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -165,7 +165,9 @@ export default function AttendancePage() {
                   onClick={() => setTimeOutModalOpen(true)}
                   disabled={!hasCheckedIn}
                 >
-                  Time Out
+                  {!timeIn
+                    ? "Time out (disabled): You haven't timed in yet."
+                    : "Time out"}
                 </Button>
               </DialogTrigger>
               <DialogContent>
