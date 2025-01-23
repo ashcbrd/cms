@@ -7,6 +7,12 @@ import { parishionerNavbarLinks } from "@/data/navbar-links";
 import { doc, getDoc } from "firebase/firestore";
 import { usePathname, useRouter } from "next/navigation";
 import { BadgeAlert, BadgeCheck, BadgeHelp } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import {
   DropdownMenu,
@@ -29,6 +35,7 @@ const ParishionerNavbar = () => {
   const [userDetails, setUserDetails] = useState<{
     firstName: string | null;
     lastName: string | null;
+    verificationStatus: string | null;
     email: string | null;
   } | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -46,6 +53,7 @@ const ParishionerNavbar = () => {
           setUserDetails({
             firstName: data.firstName,
             lastName: data.lastName,
+            verificationStatus: data.verificationStatus,
             email: user.email,
           });
         } else {
@@ -70,8 +78,6 @@ const ParishionerNavbar = () => {
         console.error("Error signing out: ", error);
       });
   };
-
-  const verificationStatus = "pending";
 
   return (
     <div className="p-x-10 h-full fixed w-[280px] p-10 border-r border-gray-300/40">
@@ -111,16 +117,39 @@ const ParishionerNavbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
               <div className="translate-y-[3px]">
-                {verificationStatus === "verified" ? (
-                  <BadgeCheck size={18} color="green" />
-                ) : verificationStatus === "unverified" ? (
-                  <BadgeAlert size={18} color="gray" />
+                {userDetails.verificationStatus === "Verified" ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <BadgeCheck size={18} color="#93DC5C" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Your account is verified.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : userDetails.verificationStatus === "Unverified" ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <BadgeAlert size={18} color="gray" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          You are not yet verified.{" "}
+                          <span className="underline">
+                            <a href="/parishioner/verification">Click here</a>
+                          </span>{" "}
+                          to verify.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 ) : (
                   <BadgeHelp size={18} color="gold" />
                 )}
               </div>
             </div>
-
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogContent>
                 <DialogHeader>

@@ -126,6 +126,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           firstName: firstName,
           lastName: lastName,
           role: "parishioner",
+          verificationStatus: "Unverified",
         };
         await setDoc(doc(db, "users", user.uid), userData);
         toast({

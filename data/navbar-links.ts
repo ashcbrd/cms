@@ -4,6 +4,8 @@ import {
   UserCog,
   CalendarCog,
   MessageSquareQuote,
+  BadgeInfo,
+  CalendarCheck,
 } from "lucide-react";
 
 export const parishionerNavbarLinks = [
@@ -37,6 +39,11 @@ export const adminNavbarLinks = [
     url: "/admin/parishioner-feedbacks",
     icon: MessageSquareQuote,
   },
+  {
+    label: "Verification Requests",
+    url: "/admin/verification-requests",
+    icon: BadgeInfo,
+  },
 ];
 
 export const priestNavbarLinks = [
@@ -52,6 +59,11 @@ export const altarServerNavbarLinks = [
     label: "Appointments",
     url: "/altar-server/appointments",
     icon: Calendar,
+  },
+  {
+    label: "Attendance",
+    url: "/altar-server/attendance",
+    icon: CalendarCheck,
   },
 ];
 

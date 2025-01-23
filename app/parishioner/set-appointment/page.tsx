@@ -22,7 +22,7 @@ import { Trash2, Plus } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import React, { useEffect, useState } from "react";
 import { db } from "@/firebase";
-import { collection, addDoc, setDoc, doc } from "firebase/firestore";
+import { collection, setDoc, doc } from "firebase/firestore";
 import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatAppointmentType } from "@/lib/format-appointment-type";
