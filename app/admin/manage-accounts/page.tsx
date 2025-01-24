@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { UserPlus, UserPen, Trash } from "lucide-react"; // Import Trash icon
+import { UserPlus, UserPen, Trash } from "lucide-react";
 import {
   collection,
   getDocs,
@@ -55,6 +55,7 @@ const ManageAccounts: React.FC = () => {
     address: string;
     contactNumber: string;
     role: string;
+    password: string;
   }>({
     firstName: "",
     lastName: "",
@@ -62,12 +63,19 @@ const ManageAccounts: React.FC = () => {
     address: "",
     contactNumber: "",
     role: "",
+    password: "",
   });
 
   const [editUser, setEditUser] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const [userToDelete, setUserToDelete] = useState<any>(null);
+  const [passwordValidation, setPasswordValidation] = useState<any>({
+    length: false,
+    number: false,
+    uppercase: false,
+    lowercase: false,
+  });
 
   const fetchUsers = async () => {
     const usersCollection = collection(db, "users");
@@ -135,9 +143,20 @@ const ManageAccounts: React.FC = () => {
       address: "",
       contactNumber: "",
       role: "",
+      password: "",
     });
     setEditUser(null);
     setIsEditDialogOpen(true);
+  };
+
+  const validatePassword = (password: string) => {
+    const validations = {
+      length: password.length >= 6,
+      number: /\d/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+    };
+    setPasswordValidation(validations);
   };
 
   const handleCreateUser = async () => {
@@ -146,13 +165,20 @@ const ManageAccounts: React.FC = () => {
       !newUser.lastName ||
       !newUser.role ||
       !newUser.address ||
-      !newUser.contactNumber
+      !newUser.contactNumber ||
+      !newUser.password ||
+      !passwordValidation.length ||
+      !passwordValidation.number ||
+      !passwordValidation.uppercase ||
+      !passwordValidation.lowercase
     ) {
-      console.log("Please fill in all fields.");
+      console.log("Please fill in all fields correctly.");
       return;
     }
 
-    await addDoc(collection(db, "users"), newUser);
+    const userCredential = await addDoc(collection(db, "users"), {
+      ...newUser,
+    });
     setNewUser({
       firstName: "",
       lastName: "",
@@ -160,6 +186,7 @@ const ManageAccounts: React.FC = () => {
       address: "",
       contactNumber: "",
       role: "",
+      password: "",
     });
     fetchUsers();
   };
@@ -325,6 +352,68 @@ const ManageAccounts: React.FC = () => {
                         }))
                   }
                 />
+              </div>
+              <div>
+                <label className="block mb-1" htmlFor="password">
+                  Password
+                </label>
+                <Input
+                  type="password"
+                  id="password"
+                  className="border rounded p-2 mb-4 w-full"
+                  value={newUser.password}
+                  onChange={(e) => {
+                    setNewUser((prev) => ({
+                      ...prev,
+                      password: e.target.value,
+                    }));
+                    validatePassword(e.target.value);
+                  }}
+                />
+                {!editUser && newUser.password.length > 0 && (
+                  <ul className="text-gray-600 text-sm mt-2">
+                    <li
+                      className={`flex gap-x-1 items-center ${
+                        passwordValidation.length
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {passwordValidation.length ? "✓" : "✗"} At least 6
+                      characters
+                    </li>
+                    <li
+                      className={`flex gap-x-1 items-center ${
+                        passwordValidation.number
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {passwordValidation.number ? "✓" : "✗"} At least one
+                      number
+                    </li>
+                    <li
+                      className={`flex gap-x-1 items-center ${
+                        passwordValidation.uppercase
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {passwordValidation.uppercase ? "✓" : "✗"} At least one
+                      uppercase letter
+                    </li>
+                    <li
+                      className={`flex gap-x-1 items-center ${
+                        passwordValidation.lowercase
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {passwordValidation.lowercase ? "✓" : "✗"} At least one
+                      lowercase letter
+                    </li>
+                  </ul>
+                )}
               </div>
               <div className="mb-6">
                 <label className="block mb-1" htmlFor="role">
