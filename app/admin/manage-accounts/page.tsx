@@ -7,8 +7,8 @@ import {
   getDocs,
   doc,
   updateDoc,
-  addDoc,
   deleteDoc,
+  setDoc,
 } from "firebase/firestore";
 import { db, auth } from "@/firebase";
 import {
@@ -30,6 +30,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatRole } from "@/lib/format-role";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { toast } from "@/hooks/use-toast";
 
 const ManageAccounts: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -125,30 +127,6 @@ const ManageAccounts: React.FC = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleEditUser = async () => {
-    if (!editUser?.firstName || !editUser?.lastName || !editUser?.email) return;
-
-    const userRef = doc(db, "users", editUser.id);
-    await updateDoc(userRef, editUser);
-    fetchUsers();
-    setIsEditDialogOpen(false);
-    setEditUser(null);
-  };
-
-  const openAddUserDialog = () => {
-    setNewUser({
-      firstName: "",
-      lastName: "",
-      email: "",
-      address: "",
-      contactNumber: "",
-      role: "",
-      password: "",
-    });
-    setEditUser(null);
-    setIsEditDialogOpen(true);
-  };
-
   const validatePassword = (password: string) => {
     const validations = {
       length: password.length >= 6,
@@ -176,19 +154,51 @@ const ManageAccounts: React.FC = () => {
       return;
     }
 
-    const userCredential = await addDoc(collection(db, "users"), {
-      ...newUser,
-    });
-    setNewUser({
-      firstName: "",
-      lastName: "",
-      email: "",
-      address: "",
-      contactNumber: "",
-      role: "",
-      password: "",
-    });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        newUser.email,
+        newUser.password
+      );
+      const user = userCredential.user;
+
+      const userData = {
+        email: user.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        address: newUser.address,
+        contactNumber: newUser.contactNumber,
+        role: newUser.role,
+      };
+
+      await setDoc(doc(db, "users", user.uid), userData);
+      toast({
+        title: "Registered successfully",
+      });
+
+      setNewUser({
+        firstName: "",
+        lastName: "",
+        email: "",
+        address: "",
+        contactNumber: "",
+        role: "",
+        password: "",
+      });
+      fetchUsers();
+    } catch (error) {
+      console.error("Error creating user:", error);
+    }
+  };
+
+  const handleEditUser = async () => {
+    if (!editUser?.firstName || !editUser?.lastName || !editUser?.email) return;
+
+    const userRef = doc(db, "users", editUser.id);
+    await updateDoc(userRef, editUser);
     fetchUsers();
+    setIsEditDialogOpen(false);
+    setEditUser(null);
   };
 
   const handleDeleteUser = async () => {
@@ -226,7 +236,7 @@ const ManageAccounts: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogTrigger asChild onClick={openAddUserDialog}>
+          <DialogTrigger asChild onClick={() => setIsEditDialogOpen(true)}>
             <Button className="flex items-center">
               <UserPlus /> Add User
             </Button>
@@ -238,249 +248,114 @@ const ManageAccounts: React.FC = () => {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                editUser ? handleEditUser() : handleCreateUser();
+                handleCreateUser();
                 setIsEditDialogOpen(false);
               }}
               className="w-full flex flex-col"
             >
-              <div>
-                <label className="block mb-1" htmlFor="firstName">
-                  First Name
-                </label>
-                <Input
-                  type="text"
-                  id="firstName"
-                  className="border rounded p-2 mb-4 w-full"
-                  value={editUser?.firstName ?? newUser.firstName}
-                  onChange={(e) =>
-                    editUser
-                      ? setEditUser((prev) => ({
-                          ...prev,
-                          firstName: e.target.value,
-                        }))
-                      : setNewUser((prev) => ({
-                          ...prev,
-                          firstName: e.target.value,
-                        }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block mb-1" htmlFor="lastName">
-                  Last Name
-                </label>
-                <Input
-                  type="text"
-                  id="lastName"
-                  className="border rounded p-2 mb-4 w-full"
-                  value={editUser?.lastName ?? newUser.lastName}
-                  onChange={(e) =>
-                    editUser
-                      ? setEditUser((prev) => ({
-                          ...prev,
-                          lastName: e.target.value,
-                        }))
-                      : setNewUser((prev) => ({
-                          ...prev,
-                          lastName: e.target.value,
-                        }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block mb-1" htmlFor="email">
-                  Email
-                </label>
-                <Input
-                  type="text"
-                  id="email"
-                  className="border rounded p-2 mb-4 w-full"
-                  value={editUser?.email ?? newUser.email}
-                  onChange={(e) =>
-                    editUser
-                      ? setEditUser((prev) => ({
-                          ...prev,
-                          email: e.target.value,
-                        }))
-                      : setNewUser((prev) => ({
-                          ...prev,
-                          email: e.target.value,
-                        }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block mb-1" htmlFor="address">
-                  Address
-                </label>
-                <Input
-                  type="text"
-                  id="address"
-                  className="border rounded p-2 mb-4 w-full"
-                  value={editUser?.address ?? newUser.address}
-                  onChange={(e) =>
-                    editUser
-                      ? setEditUser((prev) => ({
-                          ...prev,
-                          address: e.target.value,
-                        }))
-                      : setNewUser((prev) => ({
-                          ...prev,
-                          address: e.target.value,
-                        }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block mb-1" htmlFor="contactNumber">
-                  Contact Number
-                </label>
-                <Input
-                  type="text"
-                  id="contactNumber"
-                  className="border rounded p-2 mb-4 w-full"
-                  value={editUser?.contactNumber ?? newUser.contactNumber}
-                  onChange={(e) =>
-                    editUser
-                      ? setEditUser((prev) => ({
-                          ...prev,
-                          contactNumber: e.target.value,
-                        }))
-                      : setNewUser((prev) => ({
-                          ...prev,
-                          contactNumber: e.target.value,
-                        }))
-                  }
-                />
-              </div>
-              <div>
-                <label className="block mb-1" htmlFor="password">
-                  Password
-                </label>
-                <Input
-                  type="password"
-                  id="password"
-                  className="border rounded p-2 mb-4 w-full"
-                  value={newUser.password}
-                  onChange={(e) => {
-                    setNewUser((prev) => ({
-                      ...prev,
-                      password: e.target.value,
-                    }));
-                    validatePassword(e.target.value);
-                  }}
-                />
-                {!editUser && newUser.password.length > 0 && (
-                  <ul className="text-gray-600 text-sm mt-2">
-                    <li
-                      className={`flex gap-x-1 items-center ${
-                        passwordValidation.length
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
-                    >
-                      {passwordValidation.length ? "✓" : "✗"} At least 6
-                      characters
-                    </li>
-                    <li
-                      className={`flex gap-x-1 items-center ${
-                        passwordValidation.number
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
-                    >
-                      {passwordValidation.number ? "✓" : "✗"} At least one
-                      number
-                    </li>
-                    <li
-                      className={`flex gap-x-1 items-center ${
-                        passwordValidation.uppercase
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
-                    >
-                      {passwordValidation.uppercase ? "✓" : "✗"} At least one
-                      uppercase letter
-                    </li>
-                    <li
-                      className={`flex gap-x-1 items-center ${
-                        passwordValidation.lowercase
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
-                    >
-                      {passwordValidation.lowercase ? "✓" : "✗"} At least one
-                      lowercase letter
-                    </li>
-                  </ul>
-                )}
-              </div>
+              <Input
+                type="text"
+                id="firstName"
+                placeholder="First Name"
+                className="border rounded p-2 mb-4 w-full"
+                value={newUser.firstName}
+                onChange={(e) =>
+                  setNewUser((prev) => ({ ...prev, firstName: e.target.value }))
+                }
+              />
+              <Input
+                type="text"
+                id="lastName"
+                placeholder="Last Name"
+                className="border rounded p-2 mb-4 w-full"
+                value={newUser.lastName}
+                onChange={(e) =>
+                  setNewUser((prev) => ({ ...prev, lastName: e.target.value }))
+                }
+              />
+              <Input
+                type="email"
+                id="email"
+                placeholder="Email"
+                className="border rounded p-2 mb-4 w-full"
+                value={newUser.email}
+                onChange={(e) =>
+                  setNewUser((prev) => ({ ...prev, email: e.target.value }))
+                }
+              />
+              <Input
+                type="text"
+                id="address"
+                placeholder="Address"
+                className="border rounded p-2 mb-4 w-full"
+                value={newUser.address}
+                onChange={(e) =>
+                  setNewUser((prev) => ({ ...prev, address: e.target.value }))
+                }
+              />
+              <Input
+                type="text"
+                id="contactNumber"
+                placeholder="Contact Number"
+                className="border rounded p-2 mb-4 w-full"
+                value={newUser.contactNumber}
+                onChange={(e) =>
+                  setNewUser((prev) => ({
+                    ...prev,
+                    contactNumber: e.target.value,
+                  }))
+                }
+              />
+              <Input
+                type="password"
+                id="password"
+                placeholder="Password"
+                className="border rounded p-2 mb-4 w-full"
+                value={newUser.password}
+                onChange={(e) => {
+                  setNewUser((prev) => ({ ...prev, password: e.target.value }));
+                  validatePassword(e.target.value);
+                }}
+              />
               <div className="mb-6">
                 <label className="block mb-1" htmlFor="role">
                   Role
                 </label>
                 <DropdownMenu>
                   <DropdownMenuTrigger className="border text-start pl-4 py-1 rounded-md w-full">
-                    {editUser
-                      ? formatRole(editUser.role)
-                      : formatRole(newUser.role) || "Select Role"}
+                    {formatRole(newUser.role) || "Select Role"}
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuLabel>Select Role</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => {
-                        if (editUser) {
-                          setEditUser((prev) => ({ ...prev, role: "admin" }));
-                        } else {
-                          setNewUser((prev) => ({ ...prev, role: "admin" }));
-                        }
-                      }}
+                      onClick={() =>
+                        setNewUser((prev) => ({ ...prev, role: "admin" }))
+                      }
                     >
                       Admin
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => {
-                        if (editUser) {
-                          setEditUser((prev) => ({ ...prev, role: "priest" }));
-                        } else {
-                          setNewUser((prev) => ({ ...prev, role: "priest" }));
-                        }
-                      }}
+                      onClick={() =>
+                        setNewUser((prev) => ({ ...prev, role: "priest" }))
+                      }
                     >
                       Priest
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => {
-                        if (editUser) {
-                          setEditUser((prev) => ({
-                            ...prev,
-                            role: "altarServerPresident",
-                          }));
-                        } else {
-                          setNewUser((prev) => ({
-                            ...prev,
-                            role: "altarServerPresident",
-                          }));
-                        }
-                      }}
+                      onClick={() =>
+                        setNewUser((prev) => ({
+                          ...prev,
+                          role: "altarServerPresident",
+                        }))
+                      }
                     >
                       Altar Server President
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => {
-                        if (editUser) {
-                          setEditUser((prev) => ({
-                            ...prev,
-                            role: "altarServer",
-                          }));
-                        } else {
-                          setNewUser((prev) => ({
-                            ...prev,
-                            role: "altarServer",
-                          }));
-                        }
-                      }}
+                      onClick={() =>
+                        setNewUser((prev) => ({ ...prev, role: "altarServer" }))
+                      }
                     >
                       Altar Server
                     </DropdownMenuItem>
@@ -488,12 +363,13 @@ const ManageAccounts: React.FC = () => {
                 </DropdownMenu>
               </div>
               <Button type="submit" className="ml-auto">
-                {editUser ? "Update User" : "Create User"}
+                Create User
               </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
+
       <div className="mb-4 flex gap-x-4 items-center">
         <label className="mr-2 flex items-center gap-x-2">
           <Checkbox
@@ -537,7 +413,7 @@ const ManageAccounts: React.FC = () => {
         {filteredUsers.map((user) => {
           if (auth.currentUser) {
             if (user.id === auth.currentUser.uid) {
-              return;
+              return null;
             }
           }
           return (

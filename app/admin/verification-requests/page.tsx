@@ -173,24 +173,22 @@ export default function VerificationRequestsPage() {
   return (
     <div className="p-4 w-full">
       <h1 className="text-3xl font-bold mb-4">Manage Verification Requests</h1>
-      <table className="min-w-full">
-        <thead>
-          <tr>
-            <th className="border-b">Parishioner Name</th>
-            <th className="border-b">Link for ID Image</th>
-            <th className="border-b">Verification Status</th>
-            <th className="border-b">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {verificationRequests.length === 0 ? (
+      {verificationRequests.length === 0 ? (
+        <div className="text-center">
+          <p>No verification requests</p>
+        </div>
+      ) : (
+        <table className="min-w-full">
+          <thead>
             <tr>
-              <td colSpan={4} className="border-b text-center">
-                No verification requests
-              </td>
+              <th className="border-b">Parishioner Name</th>
+              <th className="border-b">Link for ID Image</th>
+              <th className="border-b">Verification Status</th>
+              <th className="border-b">Actions</th>
             </tr>
-          ) : (
-            verificationRequests.map((request) => {
+          </thead>
+          <tbody>
+            {verificationRequests.map((request) => {
               const user = users[request.userId];
               return (
                 <tr key={request.id}>
@@ -268,10 +266,10 @@ export default function VerificationRequestsPage() {
                   </td>
                 </tr>
               );
-            })
-          )}
-        </tbody>
-      </table>
+            })}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

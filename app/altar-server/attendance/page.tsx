@@ -38,7 +38,8 @@ export default function AttendancePage() {
       const today = new Date().setHours(0, 0, 0, 0);
       const todaysAttendance = attendancesArray.find(
         (att) =>
-          new Date(att.date.seconds * 1000).setHours(0, 0, 0, 0) === today
+          new Date(att.date.seconds * 1000).setHours(0, 0, 0, 0) === today &&
+          att.userId === auth.currentUser.uid
       );
       if (todaysAttendance) {
         setHasCheckedIn(!!todaysAttendance.timeIn);
@@ -246,48 +247,56 @@ export default function AttendancePage() {
                 </tr>
               </thead>
               <tbody>
-                {attendances.map((attendance) => {
-                  const attendanceDate = attendance.date?.toDate();
-                  const timeIn = attendance.timeIn;
-                  const timeOut = attendance.timeOut;
+                {attendances
+                  .filter(
+                    (attendance) => attendance.userId === auth.currentUser?.uid
+                  )
+                  .map((attendance) => {
+                    const attendanceDate = attendance.date?.toDate();
+                    const timeIn = attendance.timeIn;
+                    const timeOut = attendance.timeOut;
 
-                  const { hours: inHours, minutes: inMinutes } = parseTime(
-                    timeIn || "00:00 AM"
-                  );
-                  const { hours: outHours, minutes: outMinutes } = parseTime(
-                    timeOut || "00:00 AM"
-                  );
+                    const { hours: inHours, minutes: inMinutes } = parseTime(
+                      timeIn || "00:00 AM"
+                    );
+                    const { hours: outHours, minutes: outMinutes } = parseTime(
+                      timeOut || "00:00 AM"
+                    );
 
-                  const timeInDate = new Date(attendanceDate);
-                  timeInDate.setHours(inHours);
-                  timeInDate.setMinutes(inMinutes);
+                    const timeInDate = new Date(attendanceDate);
+                    timeInDate.setHours(inHours);
+                    timeInDate.setMinutes(inMinutes);
 
-                  const timeOutDate = new Date(attendanceDate);
-                  timeOutDate.setHours(outHours);
-                  timeOutDate.setMinutes(outMinutes);
+                    const timeOutDate = new Date(attendanceDate);
+                    timeOutDate.setHours(outHours);
+                    timeOutDate.setMinutes(outMinutes);
 
-                  const totalMinutes = differenceInMinutes(
-                    timeOutDate,
-                    timeInDate
-                  );
-                  const calculatedTotalHours =
-                    totalMinutes >= 0 ? totalMinutes / 60 : 0;
+                    const totalMinutes = differenceInMinutes(
+                      timeOutDate,
+                      timeInDate
+                    );
+                    const calculatedTotalHours =
+                      totalMinutes >= 0 ? totalMinutes / 60 : 0;
 
-                  return (
-                    <tr key={attendance.id}>
-                      <td className="border px-4 py-2 text-center">
-                        {attendanceDate ? format(attendanceDate, "PPP") : "N/A"}
-                      </td>
-                      <td className="border px-4 py-2 text-center">{timeIn}</td>
-                      <td className="border px-4 py-2 text-center">
-                        {timeOut}
-                      </td>
-                      <td className="border px-4 py-2 text-center">
-                        {calculatedTotalHours.toFixed(2)}
-                      </td>
-                    </tr>
-                  );
-                })}
+                    return (
+                      <tr key={attendance.id}>
+                        <td className="border px-4 py-2 text-center">
+                          {attendanceDate
+                            ? format(attendanceDate, "PPP")
+                            : "N/A"}
+                        </td>
+                        <td className="border px-4 py-2 text-center">
+                          {timeIn}
+                        </td>
+                        <td className="border px-4 py-2 text-center">
+                          {timeOut}
+                        </td>
+                        <td className="border px-4 py-2 text-center">
+                          {calculatedTotalHours.toFixed(2)}
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
