@@ -15,7 +15,7 @@ export default function AltarServerPresidentLayout({
     <html lang="en">
       <body className="flex gap-x-2 flex-row w-full">
         <AltarServerPresidentNavbar />
-        <main className="ml-[340px] pr-10 py-10">{children}</main>
+        <main className="ml-[340px] pr-10 py-10 w-full">{children}</main>
       </body>
     </html>
   );

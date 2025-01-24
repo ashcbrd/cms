@@ -72,7 +72,7 @@ const AltarServerPresidentNavbar = () => {
   };
 
   return (
-    <div className="p-x-10 h-full fixed w-[280px] p-10 border-r border-gray-300/40">
+    <div className="p-x-10 h-full fixed w-[320px] p-10 border-r border-gray-300/40">
       <div>
         {userDetails ? (
           <div>
