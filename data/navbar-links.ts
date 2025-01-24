@@ -74,6 +74,11 @@ export const altarServerPresidentNavbarLinks = [
     icon: Calendar,
   },
   {
+    label: "Attendance",
+    url: "/altar-server-president/attendance",
+    icon: CalendarCheck,
+  },
+  {
     label: "Altar Servers Attendance",
     url: "/altar-server-president/altar-servers-attendance",
     icon: CalendarCheck,
