@@ -7,6 +7,7 @@ import { auth, db } from "../firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { Input } from "./ui/input";
@@ -35,6 +36,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
     uppercase: false,
     lowercase: false,
   });
+  const [forgotPassword, setForgotPassword] = useState<boolean>(false); // New state
   const router = useRouter();
 
   const validatePassword = (password: string) => {
@@ -53,6 +55,12 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
 
     validatePassword(password);
 
+    if (forgotPassword) {
+      // Handle password reset
+      await handleForgotPassword();
+      return;
+    }
+
     if (isLogin) {
       try {
         setLoading(true);
@@ -69,33 +77,23 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           switch (userData.role) {
             case "parishioner":
               router.push("/parishioner/dashboard");
-              toast({
-                title: "Logged in successfully",
-              });
+              toast({ title: "Logged in successfully" });
               break;
             case "admin":
               router.push("/admin/dashboard");
-              toast({
-                title: "Logged in successfully",
-              });
+              toast({ title: "Logged in successfully" });
               break;
             case "priest":
               router.push("/priest/appointments");
-              toast({
-                title: "Logged in successfully",
-              });
+              toast({ title: "Logged in successfully" });
               break;
             case "altarServer":
               router.push("/altar-server/appointments");
-              toast({
-                title: "Logged in successfully",
-              });
+              toast({ title: "Logged in successfully" });
               break;
             case "altarServerPresident":
               router.push("/altar-server-president/appointments");
-              toast({
-                title: "Logged in successfully",
-              });
+              toast({ title: "Logged in successfully" });
               break;
             default:
               alert("No matching role found, redirecting to home.");
@@ -133,13 +131,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           email: user.email,
           firstName: firstName,
           lastName: lastName,
+          address: address,
+          contactNumber: contactNumber,
           role: "parishioner",
           verificationStatus: "Unverified",
         };
         await setDoc(doc(db, "users", user.uid), userData);
-        toast({
-          title: "Registered successfully",
-        });
+        toast({ title: "Registered successfully" });
         router.push("/parishioner/dashboard");
       } catch (err: any) {
         if (err.code === "auth/email-already-in-use") {
@@ -156,12 +154,29 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
       }
     }
 
+    // Reset fields
     setEmail("");
     setPassword("");
     setFirstName("");
     setLastName("");
     setAddress("");
     setContactNumber("");
+  };
+
+  const handleForgotPassword = async () => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your email to reset your password.",
+      });
+      // Reset state after sending email
+      setForgotPassword(false);
+    } catch {
+      setError(
+        "Error sending password reset email. Please check your email address."
+      );
+    }
   };
 
   useEffect(() => {
@@ -172,122 +187,169 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
     <form onSubmit={handleSubmit} className="relative">
       {loading && <Spinner />}
       {error && <p className="text-red-500 mb-4">{error}</p>}
-      {!isLogin && (
-        <div className="mb-4">
-          <label className="block mb-2">First Name</label>
-          <Input
-            type="text"
-            placeholder="Enter First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-        </div>
+      {forgotPassword ? ( // Render the input for forgot password
+        <>
+          <div className="mb-4">
+            <label className="block mb-2">Email</label>
+            <Input
+              type="email"
+              placeholder="Enter Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <Button className="w-full" type="submit">
+            Send Email
+          </Button>
+          <p
+            className="text-zinc-500 text-center cursor-pointer hover:underline hover:text-blue-300 mt-4"
+            onClick={() => setForgotPassword(false)}
+          >
+            Back to Login
+          </p>
+        </>
+      ) : (
+        <>
+          {!isLogin && (
+            <div className="mb-4">
+              <label className="block mb-2">First Name</label>
+              <Input
+                type="text"
+                placeholder="Enter First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+          )}
+          {!isLogin && (
+            <div className="mb-4">
+              <label className="block mb-2">Last Name</label>
+              <Input
+                type="text"
+                placeholder="Enter Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
+          )}
+          <div className="mb-4">
+            <label className="block mb-2">Email</label>
+            <Input
+              type="email"
+              placeholder="Enter Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          {!isLogin && ( // Address and Contact Number only show during registration
+            <>
+              <div className="mb-4">
+                <label className="block mb-2">Address</label>
+                <Input
+                  type="text"
+                  placeholder="Enter Address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block mb-2">Contact Number</label>
+                <Input
+                  type="text"
+                  placeholder="Enter Contact Number"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                />
+              </div>
+            </>
+          )}
+          <div className="mb-4">
+            <label className="block mb-2">Password</label>
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                validatePassword(e.target.value);
+              }}
+            />
+            {!isLogin && password.length > 0 && (
+              <ul className="text-gray-600 text-sm mt-4">
+                <li
+                  className={`flex gap-x-1 items-center ${
+                    passwordValidation.length
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {passwordValidation.length ? (
+                    <Check size={16} />
+                  ) : (
+                    <X size={16} />
+                  )}{" "}
+                  At least 6 characters
+                </li>
+                <li
+                  className={`flex gap-x-1 items-center ${
+                    passwordValidation.number
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {passwordValidation.number ? (
+                    <Check size={16} />
+                  ) : (
+                    <X size={16} />
+                  )}{" "}
+                  At least one number
+                </li>
+                <li
+                  className={`flex gap-x-1 items-center ${
+                    passwordValidation.uppercase
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {passwordValidation.uppercase ? (
+                    <Check size={16} />
+                  ) : (
+                    <X size={16} />
+                  )}{" "}
+                  At least one uppercase letter
+                </li>
+                <li
+                  className={`flex gap-x-1 ${
+                    passwordValidation.lowercase
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {passwordValidation.lowercase ? (
+                    <Check size={16} />
+                  ) : (
+                    <X size={16} />
+                  )}{" "}
+                  At least one lowercase letter
+                </li>
+              </ul>
+            )}
+          </div>
+          <Button className="w-full" type="submit">
+            {isLogin ? "Login" : "Register"}
+          </Button>
+          {isLogin && (
+            <div className="mt-4">
+              <p
+                className="text-zinc-500 text-center cursor-pointer hover:underline hover:text-blue-300"
+                onClick={() => setForgotPassword(true)}
+              >
+                Forgot Password?
+              </p>
+            </div>
+          )}
+        </>
       )}
-      {!isLogin && (
-        <div className="mb-4">
-          <label className="block mb-2">Last Name</label>
-          <Input
-            type="text"
-            placeholder="Enter Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-      )}
-      <div className="mb-4">
-        <label className="block mb-2">Email</label>
-        <Input
-          type="email"
-          placeholder="Enter Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block mb-2">Address</label>
-        <Input
-          type="text"
-          placeholder="Enter Address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block mb-2">Contact Number</label>
-        <Input
-          type="text"
-          placeholder="Enter Contact Number"
-          value={contactNumber}
-          onChange={(e) => setContactNumber(e.target.value)}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block mb-2">Password</label>
-        <Input
-          type={showPassword ? "text" : "password"}
-          placeholder="Enter Password"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            validatePassword(e.target.value);
-          }}
-        />
-        {!isLogin && password.length > 0 && (
-          <ul className="text-gray-600 text-sm mt-4">
-            <li
-              className={`flex gap-x-1 items-center ${
-                passwordValidation.length ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {passwordValidation.length ? (
-                <Check size={16} />
-              ) : (
-                <X size={16} />
-              )}{" "}
-              At least 6 characters
-            </li>
-            <li
-              className={`flex gap-x-1 items-center ${
-                passwordValidation.number ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {passwordValidation.number ? (
-                <Check size={16} />
-              ) : (
-                <X size={16} />
-              )}{" "}
-              At least one number
-            </li>
-            <li
-              className={`flex gap-x-1 items-center ${
-                passwordValidation.uppercase ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {passwordValidation.uppercase ? (
-                <Check size={16} />
-              ) : (
-                <X size={16} />
-              )}{" "}
-              At least one uppercase letter
-            </li>
-            <li
-              className={`flex gap-x-1 ${
-                passwordValidation.lowercase ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {passwordValidation.lowercase ? (
-                <Check size={16} />
-              ) : (
-                <X size={16} />
-              )}{" "}
-              At least one lowercase letter
-            </li>
-          </ul>
-        )}
-      </div>
-      <Button className="w-full" type="submit">
-        {isLogin ? "Login" : "Register"}
-      </Button>
     </form>
   );
 };
