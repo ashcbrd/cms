@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
           <DialogTrigger className="hover:bg-zinc-100 transition-all rounded-full h-max py-2 px-4 border-[1px] border-gray-500/20">
             Register
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90%] overflow-auto">
             <DialogHeader>
               <DialogTitle>Register</DialogTitle>
               <DialogDescription>
@@ -34,7 +34,7 @@ const Navbar: React.FC = () => {
           <DialogTrigger className="hover:bg-[#9f4f2f] transition-all rounded-full h-max py-2 px-4 bg-primary text-white">
             Login
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90%] overflow-auto">
             <DialogHeader>
               <DialogTitle>Log in</DialogTitle>
               <DialogDescription>

@@ -24,6 +24,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
   const [password, setPassword] = useState<string>("");
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
+  const [contactNumber, setContactNumber] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -158,6 +160,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
     setPassword("");
     setFirstName("");
     setLastName("");
+    setAddress("");
+    setContactNumber("");
   };
 
   useEffect(() => {
@@ -197,6 +201,24 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           placeholder="Enter Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Address</label>
+        <Input
+          type="text"
+          placeholder="Enter Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Contact Number</label>
+        <Input
+          type="text"
+          placeholder="Enter Contact Number"
+          value={contactNumber}
+          onChange={(e) => setContactNumber(e.target.value)}
         />
       </div>
       <div className="mb-4">
