@@ -11,6 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/lib/format-date";
 import { formatAppointmentType } from "@/lib/format-appointment-type";
 
@@ -18,9 +20,10 @@ const AppointmentsPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [isFeedbackVisible, setIsFeedbackVisible] = useState(false);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -46,6 +49,7 @@ const AppointmentsPage = () => {
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     const userId = auth.currentUser ? auth.currentUser.uid : null;
+
     if (!userId) {
       setError("User not authenticated. Please log in to set an appointment.");
       return;
@@ -61,10 +65,11 @@ const AppointmentsPage = () => {
           feedback: feedbackText,
         });
         setFeedbackText("");
-        setFeedbackDialogOpen(false);
+        setIsFeedbackVisible(false);
+        setSelectedAppointment(null);
+        setFeedbackError(null);
       } catch (err) {
-        console.error("Error adding feedback:", err);
-        setError("Failed to submit feedback.");
+        setFeedbackError("Failed to submit feedback.");
       }
     }
   };
@@ -337,46 +342,47 @@ const AppointmentsPage = () => {
                   </DialogTitle>
                 </DialogHeader>
                 {renderDetails(appointment)}
-                <div className="mt-5">
-                  {canLeaveFeedback && (
-                    <button
-                      className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                      onClick={() => {
-                        setSelectedAppointment(appointment);
-                        setFeedbackDialogOpen(true);
-                      }}
+                {canLeaveFeedback && (
+                  <div className="mt-5">
+                    <Button
+                      variant="secondary"
+                      onClick={() => setIsFeedbackVisible(!isFeedbackVisible)}
                     >
-                      Feedback
-                    </button>
-                  )}
-                  <Dialog
-                    open={feedbackDialogOpen}
-                    onOpenChange={() => setFeedbackDialogOpen(false)}
-                  >
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Leave Feedback</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleFeedbackSubmit}>
-                        <textarea
-                          className="mt-4 w-full h-32 p-2 border rounded-md"
+                      Leave Feedback
+                    </Button>
+                    {isFeedbackVisible && (
+                      <form
+                        onSubmit={handleFeedbackSubmit}
+                        className="flex flex-col mt-4"
+                      >
+                        {feedbackError && (
+                          <p className="text-red-600">{feedbackError}</p>
+                        )}
+                        <Textarea
                           placeholder="Enter your feedback here"
                           value={feedbackText}
                           onChange={(e) => setFeedbackText(e.target.value)}
                           required
                         />
                         <div className="flex justify-end mt-4">
-                          <button
-                            type="submit"
-                            className="py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600"
+                          <Button type="submit">Submit Feedback</Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setIsFeedbackVisible(false);
+                              setFeedbackText("");
+                              setFeedbackError(null);
+                            }}
+                            className="ml-2"
                           >
-                            Submit Feedback
-                          </button>
+                            Cancel
+                          </Button>
                         </div>
                       </form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                    )}
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
           );
