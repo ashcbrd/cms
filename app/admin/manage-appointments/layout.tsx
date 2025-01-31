@@ -15,7 +15,7 @@ export default function AdminLayout({
     <html lang="en">
       <body className="flex gap-x-2 flex-row w-full">
         <AdminNavbar />
-        <main className="ml-[320px] pr-10 py-10 w-full">{children}</main>
+        <main className="ml-[320px] pr-10 py-10">{children}</main>
       </body>
     </html>
   );

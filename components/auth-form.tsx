@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -12,6 +13,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Check, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import Spinner from "./spinner";
 
 interface AuthFormProps {
   isLogin: boolean;
@@ -24,6 +26,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
   const [lastName, setLastName] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [passwordValidation, setPasswordValidation] = useState<any>({
     length: false,
     number: false,
@@ -50,6 +53,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
 
     if (isLogin) {
       try {
+        setLoading(true);
         const userCredential = await signInWithEmailAndPassword(
           auth,
           email,
@@ -100,6 +104,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
         }
       } catch {
         setError("Invalid credentials. Please try again.");
+      } finally {
+        setLoading(false);
       }
     } else {
       if (
@@ -159,7 +165,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
   }, [firstName, lastName, email, password]);
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="relative">
+      {loading && <Spinner />}
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {!isLogin && (
         <div className="mb-4">

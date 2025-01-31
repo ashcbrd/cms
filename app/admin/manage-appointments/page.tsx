@@ -2,8 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { db, auth } from "@/firebase";
-import { collection, getDocs, setDoc, doc } from "firebase/firestore";
-import AppointmentCard from "@/components/appointment-card";
+import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import "./custom-calendar.css";
 import {
   Dialog,
   DialogContent,
@@ -11,63 +14,81 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { formatDate } from "@/lib/format-date";
 import { formatAppointmentType } from "@/lib/format-appointment-type";
+import { formatDate } from "@/lib/format-date";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
-const AppointmentsPage = () => {
-  const [appointments, setAppointments] = useState([]);
+const ManageAppointmentsPage = () => {
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [feedbackText, setFeedbackText] = useState("");
+  const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
+
+  const { toast } = useToast();
 
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        setLoading(true);
-        const appointmentCollection = collection(db, "appointments");
-        const snapshot = await getDocs(appointmentCollection);
-        const appointmentsData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setAppointments(appointmentsData);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await fetchAppointments();
+      } else {
         setLoading(false);
       }
-    };
+    });
 
-    fetchAppointments();
+    return () => unsubscribe();
   }, []);
 
-  const handleFeedbackSubmit = async (e) => {
-    e.preventDefault();
-    const userId = auth.currentUser ? auth.currentUser.uid : null;
-    if (!userId) {
-      setError("User not authenticated. Please log in to set an appointment.");
-      return;
-    }
-
-    if (selectedAppointment) {
-      try {
-        const feedbackRef = doc(collection(db, "feedbacks"));
-        await setDoc(feedbackRef, {
-          id: feedbackRef.id,
-          userId,
-          appointmentId: selectedAppointment.id,
-          feedback: feedbackText,
-        });
-        setFeedbackText("");
-        setFeedbackDialogOpen(false);
-      } catch (err) {
-        console.error("Error adding feedback:", err);
-        setError("Failed to submit feedback.");
-      }
+  const fetchAppointments = async () => {
+    setLoading(true);
+    try {
+      const appointmentsQuery = collection(db, "appointments");
+      const snapshot = await getDocs(appointmentsQuery);
+      const appointmentsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setAppointments(appointmentsData);
+    } catch (err) {
+      console.error("Error fetching appointments: ", err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const updateAppointmentStatus = async (id: string, status: string) => {
+    const appointmentRef = doc(db, "appointments", id);
+
+    try {
+      await updateDoc(appointmentRef, {
+        status: status,
+      });
+      if (status === "Accepted") {
+        toast({
+          duration: 5000,
+          title: "Appointment accepted.",
+        });
+      } else if (status === "Denied") {
+        toast({
+          title: "Appointment denied.",
+        });
+      }
+      fetchAppointments();
+    } catch (err) {
+      console.error("Error updating appointment status: ", err);
+    }
+  };
+
+  useEffect(() => {
+    const datesWithAppointments = appointments.map((app) => new Date(app.date));
+    setHighlightedDates(datesWithAppointments);
+  }, [appointments]);
+
+  const statuses = ["Pending", "Accepted", "Denied", "Confirmed"];
+
+  const groupedAppointments = statuses.reduce((acc, status) => {
+    acc[status] = appointments.filter((app) => app.status === status);
+    return acc;
+  }, {} as Record<string, any[]>);
 
   const renderDetails = (appointment) => {
     switch (appointment.appointmentType) {
@@ -115,6 +136,7 @@ const AppointmentsPage = () => {
           <div className="flex gap-x-10">
             <div>
               <h3 className="text-lg font-bold">Bride Details</h3>
+
               <div className="mt-4">
                 <p className="w-max">
                   <strong>Name:</strong>{" "}
@@ -151,10 +173,12 @@ const AppointmentsPage = () => {
                 <p className="w-max">
                   <strong>Religion:</strong> {weddingDetails.bride.religion}
                 </p>
+
                 <p className="w-max">
                   <strong>Father's Name:</strong>{" "}
                   {`${weddingDetails.bride.father.firstName} ${weddingDetails.bride.father.lastName}`}
                 </p>
+
                 <p className="w-max">
                   <strong>Mother's Name:</strong>{" "}
                   {`${weddingDetails.bride.mother.firstName} ${weddingDetails.bride.mother.lastName}`}
@@ -163,6 +187,7 @@ const AppointmentsPage = () => {
             </div>
             <div>
               <h3 className="font-bold text-lg">Groom Details</h3>
+
               <div className="mt-4">
                 <p className="w-max">
                   <strong>Name:</strong>{" "}
@@ -199,10 +224,12 @@ const AppointmentsPage = () => {
                 <p className="w-max">
                   <strong>Religion:</strong> {weddingDetails.groom.religion}
                 </p>
+
                 <p className="w-max">
                   <strong>Father's Name:</strong>{" "}
                   {`${weddingDetails.groom.father.firstName} ${weddingDetails.groom.father.lastName}`}
                 </p>
+
                 <p className="w-max">
                   <strong>Mother's Name:</strong>{" "}
                   {`${weddingDetails.groom.mother.firstName} ${weddingDetails.groom.mother.lastName}`}
@@ -211,6 +238,7 @@ const AppointmentsPage = () => {
             </div>
           </div>
         );
+
       case "confirmation":
         const confirmationDetails = appointment?.confirmation.confirmant;
         return (
@@ -297,93 +325,168 @@ const AppointmentsPage = () => {
   };
 
   return (
-    <div className="w-full p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold mb-4">My Appointments</h2>
-        <a
-          href="/parishioner/set-appointment"
-          className="py-2 px-6 bg-primary rounded-md text-white hover:bg-hover transition-all"
-        >
-          Schedule an Appointment
-        </a>
-      </div>
-      {loading && <p>Loading appointments...</p>}
-      {error && <p className="text-red-600">{error}</p>}
-      {appointments.length === 0 && !loading && (
-        <p>No appointments scheduled.</p>
-      )}
-      <div className="mt-10 flex flex-col">
-        {appointments.map((appointment) => {
-          const appointmentDate = new Date(appointment.date);
-          const today = new Date();
-          const canLeaveFeedback =
-            appointment.status === "Confirmed" && appointmentDate < today;
-
-          return (
-            <Dialog key={appointment.id}>
-              <DialogTrigger className="w-full">
-                <AppointmentCard appointment={appointment} />
-              </DialogTrigger>
-              <DialogContent className="!min-w-max p-10">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl">
-                    {formatAppointmentType(appointment.appointmentType)
-                      .charAt(0)
-                      .toUpperCase() +
-                      formatAppointmentType(appointment.appointmentType).slice(
-                        1
-                      )}{" "}
-                    Appointment
-                  </DialogTitle>
-                </DialogHeader>
-                {renderDetails(appointment)}
-                <div className="mt-5">
-                  {canLeaveFeedback && (
-                    <button
-                      className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                      onClick={() => {
-                        setSelectedAppointment(appointment);
-                        setFeedbackDialogOpen(true);
-                      }}
-                    >
-                      Feedback
-                    </button>
-                  )}
-                  <Dialog
-                    open={feedbackDialogOpen}
-                    onOpenChange={() => setFeedbackDialogOpen(false)}
-                  >
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Leave Feedback</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleFeedbackSubmit}>
-                        <textarea
-                          className="mt-4 w-full h-32 p-2 border rounded-md"
-                          placeholder="Enter your feedback here"
-                          value={feedbackText}
-                          onChange={(e) => setFeedbackText(e.target.value)}
-                          required
-                        />
-                        <div className="flex justify-end mt-4">
-                          <button
-                            type="submit"
-                            className="py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600"
+    <div className="p-4">
+      <h1 className="text-3xl font-bold mb-4">Manage Appointments</h1>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div>
+          <div className="bg-white p-4 border border-gray-300/50 rounded-lg shadow-md shadow-gray-300/20 mt-4">
+            <h2 className="text-xl font-semibold">Pending Appointments </h2>
+            <p className="text-gray-600 font-normal text-xs">
+              Click an appointment to see details.
+            </p>
+            {groupedAppointments["Pending"].length > 0 ? (
+              <ul className="max-h-52 overflow-y-auto">
+                {groupedAppointments["Pending"].map((app) => (
+                  <li key={app.id} className="border-b border-gray-200 py-2">
+                    <Dialog>
+                      <div className="flex items-center justify-between">
+                        <DialogTrigger>
+                          <h2 className="hover:underline transition-all">
+                            <span className="font-bold">
+                              {formatAppointmentType(app.appointmentType)}
+                            </span>{" "}
+                            -{" "}
+                            {formatDate(
+                              new Date(app.date).toLocaleDateString()
+                            )}
+                          </h2>
+                        </DialogTrigger>
+                        <div className="mt-2">
+                          <Button
+                            onClick={() =>
+                              updateAppointmentStatus(app.id, "Accepted")
+                            }
+                            className="mr-2  py-1 px-3 bg-blue-500 hover:bg-blue-700"
                           >
-                            Submit Feedback
-                          </button>
+                            Accept
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() =>
+                              updateAppointmentStatus(app.id, "Denied")
+                            }
+                            className="py-1 px-3"
+                          >
+                            Deny
+                          </Button>
                         </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </DialogContent>
-            </Dialog>
-          );
-        })}
-      </div>
+                      </div>
+                      <DialogContent className="!min-w-max p-10">
+                        <DialogHeader>
+                          <DialogTitle className="text-2xl">
+                            {formatAppointmentType(app.appointmentType)
+                              .charAt(0)
+                              .toUpperCase() +
+                              formatAppointmentType(app.appointmentType).slice(
+                                1
+                              )}{" "}
+                            Appointment
+                          </DialogTitle>
+                        </DialogHeader>
+                        {renderDetails(app)}
+                        <div className="mt-2">
+                          <Button
+                            onClick={() =>
+                              updateAppointmentStatus(app.id, "Accepted")
+                            }
+                            className="mr-2  py-1 px-3"
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              updateAppointmentStatus(app.id, "Denied")
+                            }
+                            className="py-1 px-3"
+                          >
+                            Deny
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No appointments for this status.</p>
+            )}
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {statuses.slice(1).map((status) => (
+              <div
+                key={status}
+                className="bg-white p-4 border border-gray-300/50 rounded-lg shadow-md shadow-gray-300/20 mt-4"
+              >
+                <h2 className="text-xl font-semibold">{status} Appointments</h2>
+                {groupedAppointments[status].length > 0 && (
+                  <p className="text-gray-600 font-normal text-xs">
+                    Click an appointment to see details.
+                  </p>
+                )}
+                {groupedAppointments[status].length > 0 ? (
+                  <ul className="max-h-52 overflow-y-auto">
+                    {groupedAppointments[status].map((app) => (
+                      <li
+                        key={app.id}
+                        className="border-b border-gray-200 py-2"
+                      >
+                        <Dialog>
+                          <DialogTrigger>
+                            <h2 className="hover:underline transition-all">
+                              <span className="font-bold">
+                                {formatAppointmentType(app.appointmentType)}
+                              </span>{" "}
+                              -{" "}
+                              {formatDate(
+                                new Date(app.date).toLocaleDateString()
+                              )}
+                            </h2>
+                          </DialogTrigger>
+                          <DialogContent className="!min-w-max p-10">
+                            <DialogHeader>
+                              <DialogTitle className="text-2xl">
+                                {formatAppointmentType(app.appointmentType)
+                                  .charAt(0)
+                                  .toUpperCase() +
+                                  formatAppointmentType(
+                                    app.appointmentType
+                                  ).slice(1)}{" "}
+                                Appointment
+                              </DialogTitle>
+                            </DialogHeader>
+                            {renderDetails(app)}
+                          </DialogContent>
+                        </Dialog>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No appointments for this status.</p>
+                )}
+              </div>
+            ))}
+            <div className="col-span-full bg-white mt-6">
+              <h2 className="text-xl font-semibold">Appointments Calendar</h2>
+              <Calendar
+                className="my-calendar mt-6"
+                tileClassName={({ date }) =>
+                  highlightedDates.some(
+                    (highlighted) =>
+                      highlighted.toDateString() === date.toDateString()
+                  )
+                    ? "highlighted"
+                    : ""
+                }
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default AppointmentsPage;
+export default ManageAppointmentsPage;
