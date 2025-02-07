@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CMS - Content Management System
+
+Welcome to the CMS (Content Management System) project! This project utilizes **Node.js**, **TypeScript**, **Shadcn**, and **Tailwind CSS**. Below you will find all the necessary information to get started, including installation requirements, commands to run the project, and how to access it on your local machine.
+
+## Requirements
+
+Before you can run the CMS project, ensure you have the following installed on your machine:
+
+- [Node.js (latest version)](https://nodejs.org/en/download/)
+- TypeScript
+- Shadcn
+- Tailwind CSS
+
+### Install Node.js
+
+You can download the latest version of Node.js from the link below:
+
+- [Download Node.js](https://nodejs.org/en/download/)
+
+Node.js installation includes npm (Node Package Manager), which you will use for managing packages in this project.
+
+### Install TypeScript
+
+You can install TypeScript globally using npm. Open your terminal and run:
+
+````bash
+npm install -g typescript
 
 ## Getting Started
 
-First, run the development server:
+1. **Clone the repository**:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   First, clone the repository to your local machine using the following command:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   ```bash
+   git clone <repository-url>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. **Navigate into the project directory**:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   cd CMS
 
-## Learn More
+3. **Install package dependencies**:
 
-To learn more about Next.js, take a look at the following resources:
+    ```bash
+    npm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Commands
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+ After the installation is complete, you can start the development server using the following command:
 
-## Deploy on Vercel
+    ```bash
+    npm run dev
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+ ## Running the Application
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ Once the development server is running, you can access the CMS on your local machine at:
+
+    ```bash
+    http://localhost:3000
+````

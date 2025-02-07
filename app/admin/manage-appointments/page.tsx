@@ -18,6 +18,7 @@ import { formatAppointmentType } from "@/lib/format-appointment-type";
 import { formatDate } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import twilio from "twilio";
 
 const ManageAppointmentsPage = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -25,6 +26,10 @@ const ManageAppointmentsPage = () => {
   const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
 
   const { toast } = useToast();
+  const twilioClient = twilio(
+    "AC8cca343a0750d06b7990a6457fee3a92",
+    "793f818ca26736fe38ea059c90f61cc6"
+  );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -67,6 +72,16 @@ const ManageAppointmentsPage = () => {
           duration: 5000,
           title: "Appointment accepted.",
         });
+        const appointment = appointments.find((app) => app.id === id);
+        await twilioClient.messages.create({
+          body: `Your appointment for ${formatAppointmentType(
+            appointment.appointmentType
+          )} on ${formatDate(
+            new Date(appointment.date).toLocaleDateString()
+          )} has been accepted.`,
+          from: "YOUR_TWILIO_PHONE_NUMBER",
+          to: "+639981809615",
+        });
       } else if (status === "Denied") {
         toast({
           title: "Appointment denied.",
@@ -88,7 +103,7 @@ const ManageAppointmentsPage = () => {
   const groupedAppointments = statuses.reduce((acc, status) => {
     acc[status] = appointments.filter((app) => app.status === status);
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {} as Record<string, unknown[]>);
 
   const renderDetails = (appointment) => {
     switch (appointment.appointmentType) {
@@ -136,7 +151,6 @@ const ManageAppointmentsPage = () => {
           <div className="flex gap-x-10">
             <div>
               <h3 className="text-lg font-bold">Bride Details</h3>
-
               <div className="mt-4">
                 <p className="w-max">
                   <strong>Name:</strong>{" "}
@@ -173,12 +187,10 @@ const ManageAppointmentsPage = () => {
                 <p className="w-max">
                   <strong>Religion:</strong> {weddingDetails.bride.religion}
                 </p>
-
                 <p className="w-max">
                   <strong>Father's Name:</strong>{" "}
                   {`${weddingDetails.bride.father.firstName} ${weddingDetails.bride.father.lastName}`}
                 </p>
-
                 <p className="w-max">
                   <strong>Mother's Name:</strong>{" "}
                   {`${weddingDetails.bride.mother.firstName} ${weddingDetails.bride.mother.lastName}`}
@@ -187,7 +199,6 @@ const ManageAppointmentsPage = () => {
             </div>
             <div>
               <h3 className="font-bold text-lg">Groom Details</h3>
-
               <div className="mt-4">
                 <p className="w-max">
                   <strong>Name:</strong>{" "}
@@ -224,12 +235,10 @@ const ManageAppointmentsPage = () => {
                 <p className="w-max">
                   <strong>Religion:</strong> {weddingDetails.groom.religion}
                 </p>
-
                 <p className="w-max">
                   <strong>Father's Name:</strong>{" "}
                   {`${weddingDetails.groom.father.firstName} ${weddingDetails.groom.father.lastName}`}
                 </p>
-
                 <p className="w-max">
                   <strong>Mother's Name:</strong>{" "}
                   {`${weddingDetails.groom.mother.firstName} ${weddingDetails.groom.mother.lastName}`}
