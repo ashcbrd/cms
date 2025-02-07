@@ -33,12 +33,12 @@ npm install -g typescript
    First, clone the repository to your local machine using the following command:
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/ashcbrd/cms.git
 
 2. **Navigate into the project directory**:
 
    ```bash
-   cd CMS
+   cd cms
 
 3. **Install package dependencies**:
 
