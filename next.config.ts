@@ -1,8 +1,6 @@
 const nextConfig = {
-  webpack(config: { resolve: { fallback: { fs: boolean } } }) {
-    config.resolve.fallback.fs = false;
-    return config;
-  },
+  reactStrictMode: true,
+  // Other configuration options
 };
 
 module.exports = nextConfig;
