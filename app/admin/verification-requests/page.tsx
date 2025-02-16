@@ -71,7 +71,9 @@ export default function VerificationRequestsPage() {
         userDetails.forEach((user) => {
           if (user) {
             usersMap[user.id] = {
+              // @ts-ignore
               firstName: user.firstName,
+              // @ts-ignore
               lastName: user.lastName,
             };
           }

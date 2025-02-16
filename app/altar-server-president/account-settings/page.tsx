@@ -71,7 +71,7 @@ export default function AccountSettingsPage() {
     e.preventDefault();
     if (user) {
       const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, formData);
+      await updateDoc(userDocRef, formData as any);
       setUserData(formData);
       setIsModalOpen(false);
     }

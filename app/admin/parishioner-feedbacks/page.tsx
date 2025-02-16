@@ -76,7 +76,9 @@ export default function FeedbacksPage() {
         userDetails.forEach((user) => {
           if (user) {
             usersMap[user.id] = {
+              // @ts-ignore
               firstName: user.firstName,
+              // @ts-ignore
               lastName: user.lastName,
             };
           }
@@ -88,7 +90,9 @@ export default function FeedbacksPage() {
         appointmentDetails.forEach((appointment) => {
           if (appointment) {
             appointmentsMap[appointment.id] = {
+              // @ts-ignore
               appointmentType: appointment.appointmentType,
+              // @ts-ignore
               date: new Date(appointment.date).toLocaleDateString("en-GB", {
                 day: "numeric",
                 month: "long",

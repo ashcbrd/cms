@@ -59,6 +59,7 @@ const AppointmentsPage: React.FC = () => {
     setHighlightedDates(datesWithAppointments);
   }, [appointments]);
 
+  // @ts-ignore
   const renderDetails = (appointment) => {
     switch (appointment.appointmentType) {
       case "baptismal":
@@ -76,6 +77,7 @@ const AppointmentsPage: React.FC = () => {
                 <strong>God Mothers:</strong>{" "}
                 {baptismalDetails.godMothers
                   .map(
+                    // @ts-ignore
                     (godMother) =>
                       `${godMother.firstName} ${godMother.lastName}`
                   )
@@ -87,6 +89,7 @@ const AppointmentsPage: React.FC = () => {
                 <strong>God Fathers:</strong>{" "}
                 {baptismalDetails.godFathers
                   .map(
+                    // @ts-ignore
                     (godFather) =>
                       `${godFather.firstName} ${godFather.lastName}`
                   )

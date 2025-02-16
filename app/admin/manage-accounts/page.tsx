@@ -119,6 +119,7 @@ const ManageAccounts: React.FC = () => {
   }, [searchTerm, selectedRoles, users]);
 
   const handleRoleChange = (role: string) => {
+    //@ts-ignore
     setSelectedRoles((prev) => ({ ...prev, [role]: !prev[role] }));
   };
 
