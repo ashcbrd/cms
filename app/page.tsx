@@ -10,7 +10,7 @@ export default function Home() {
       <div className="h-full flex flex-col gap-y-10 items-center justify-center max-w-6xl">
         <div className="w-max mx-auto flex flex-col items-center gap-y-4">
           <h1 className="main-text-color text-6xl font-bold py-1 text-center">
-            Chuch Management System
+            Church Management System
           </h1>
           <p className="max-w-[600px] text-center">
             Embrace Your Faith with Ease at Jaro Church: Conveniently Set Your
