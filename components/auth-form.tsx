@@ -11,7 +11,7 @@ import {
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Check, X } from "lucide-react";
+import { Check, X, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Spinner from "./spinner";
 
@@ -264,15 +264,32 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
           )}
           <div className="mb-4">
             <label className="block mb-2">Password</label>
-            <Input
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter Password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                validatePassword(e.target.value);
-              }}
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter Password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  validatePassword(e.target.value);
+                }}
+              />
+              <div className="absolute top-0 bottom-0 m-auto right-4 h-max">
+                {showPassword ? (
+                  <Eye
+                    size={18}
+                    color="gray"
+                    onClick={() => setShowPassword(false)}
+                  />
+                ) : (
+                  <EyeOff
+                    color="gray"
+                    onClick={() => setShowPassword(true)}
+                    size={18}
+                  />
+                )}
+              </div>
+            </div>
             {!isLogin && password.length > 0 && (
               <ul className="text-gray-600 text-sm mt-4">
                 <li

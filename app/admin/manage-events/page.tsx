@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { db } from "@/firebase";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { formatAppointmentType } from "@/lib/format-appointment-type";
-import { UserPen, EyeIcon } from "lucide-react";
+import { UserPen, EyeIcon, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format-date";
 import {
@@ -21,7 +21,7 @@ export default function ManageEvents() {
   const [users, setUsers] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [detailsAppointment, setDetailsAppointment] = useState(null);
-  const [confirmationAppointment, setConfirmationAppointment] = useState(null); // Separate state for confirmation dialog
+  const [confirmationAppointment, setConfirmationAppointment] = useState(null);
   const [tempParticipants, setTempParticipants] = useState({});
 
   useEffect(() => {
@@ -32,10 +32,10 @@ export default function ManageEvents() {
         .map((doc) => ({ id: doc.id, ...doc.data() }))
         .filter(
           (appointment) =>
-            //@ts-ignore
+            // @ts-ignore
             appointment.status !== "Pending" && appointment.status !== "Denied"
         );
-      //@ts-ignore
+      // @ts-ignore
       setAppointments(appointmentsData);
 
       const usersRef = collection(db, "users");
@@ -44,14 +44,13 @@ export default function ManageEvents() {
         id: doc.id,
         ...doc.data(),
       }));
-      //@ts-ignore
+      // @ts-ignore
       setUsers(usersData);
     };
 
     fetchAppointmentsAndUsers();
   }, []);
-
-  //@ts-ignore
+  // @ts-ignore
   const handleEditParticipants = (appointment) => {
     setSelectedAppointment(appointment);
     setTempParticipants({
@@ -60,22 +59,21 @@ export default function ManageEvents() {
       altarServerPresident: appointment.altarServerPresidentId || null,
     });
   };
-
-  //@ts-ignore
+  // @ts-ignore
   const handleShowDetails = (appointment) => {
     setDetailsAppointment(appointment);
   };
 
   const handleSaveParticipants = async () => {
     if (selectedAppointment) {
-      //@ts-ignore
+      // @ts-ignore
       const appointmentRef = doc(db, "appointments", selectedAppointment.id);
       const updates = {
-        //@ts-ignore
+        // @ts-ignore
         altarServerId: tempParticipants.altarServer || null,
-        //@ts-ignore
+        // @ts-ignore
         altarServerPresidentId: tempParticipants.altarServerPresident || null,
-        //@ts-ignore
+        // @ts-ignore
         priestId: tempParticipants.priest || null,
       };
       await updateDoc(appointmentRef, updates);
@@ -91,15 +89,15 @@ export default function ManageEvents() {
       .map((doc) => ({ id: doc.id, ...doc.data() }))
       .filter(
         (appointment) =>
-          //@ts-ignore
+          // @ts-ignore
           appointment.status !== "Pending" && appointment.status !== "Denied"
       );
-    //@ts-ignore
+    // @ts-ignore
     setAppointments(appointmentsData);
   };
-  //@ts-ignore
+  // @ts-ignore
   const handleConfirmAppointment = (appointment) => {
-    setConfirmationAppointment(appointment); // Set confirmation state to the appointment being confirmed
+    setConfirmationAppointment(appointment);
   };
 
   const confirmAppointment = async () => {
@@ -108,35 +106,96 @@ export default function ManageEvents() {
         const appointmentRef = doc(
           db,
           "appointments",
-          //@ts-ignore
+          // @ts-ignore
           confirmationAppointment.id
         );
         await updateDoc(appointmentRef, { status: "Confirmed" });
         fetchAppointments();
-        setConfirmationAppointment(null); // Reset the confirmation appointment after confirming
+        setConfirmationAppointment(null);
       } catch (error) {
         console.error("Error confirming appointment:", error);
       }
     }
   };
-  //@ts-ignore
+  // @ts-ignore
   const handleSelectParticipant = (role, userId) => {
     setTempParticipants((prev) => ({ ...prev, [role]: userId }));
   };
-
   // @ts-ignore
   const getParticipantName = (role) => {
-    //@ts-ignore
+    // @ts-ignore
     const participantId = tempParticipants[role];
-    //@ts-ignore
+    // @ts-ignore
     const participant = users.find((user) => user.id === participantId);
     return participant
-      ? //@ts-ignore
+      ? // @ts-ignore
         `${participant.firstName} ${participant.lastName}`
       : `Select ${role.charAt(0).toUpperCase() + role.slice(1)}`;
   };
-  //@ts-ignore
+  // @ts-ignore
   const renderDetails = (appointment) => {
+    const ministersSection = (
+      <div className="mt-6">
+        <div className="flex flex-col">
+          {appointment.priestId && (
+            <p>
+              <strong>Priest:</strong> {/*  @ts-ignore */}
+              {users.find((user) => user.id === appointment.priestId)
+                ? `${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.priestId)
+                      .firstName
+                  } ${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.priestId)
+                      .lastName
+                  }`
+                : "Priest not found"}
+            </p>
+          )}
+          {appointment.altarServerId && (
+            <p>
+              <strong>Altar Server:</strong> {/* @ts-ignore */}
+              {users.find((user) => user.id === appointment.altarServerId)
+                ? `${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.altarServerId)
+                      .firstName
+                  } ${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.altarServerId)
+                      .lastName
+                  }`
+                : "Altar Server not found"}
+            </p>
+          )}
+          {appointment.altarServerPresidentId && (
+            <p>
+              <strong>Altar Server President:</strong>{" "}
+              {users.find(
+                // @ts-ignore
+                (user) => user.id === appointment.altarServerPresidentId
+              )
+                ? `${
+                    // @ts-ignore
+                    users.find(
+                      // @ts-ignore
+                      (user) => user.id === appointment.altarServerPresidentId
+                    ).firstName
+                  } ${
+                    // @ts-ignore
+                    users.find(
+                      // @ts-ignore
+                      (user) => user.id === appointment.altarServerPresidentId
+                    ).lastName
+                  }`
+                : "Altar Server President not found"}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+
     switch (appointment.appointmentType) {
       case "baptismal":
         const baptismalDetails = appointment?.baptismal.child;
@@ -145,9 +204,7 @@ export default function ManageEvents() {
             {baptismalDetails?.dateOfBirth && (
               <p className="w-max">
                 <strong>Child Date of Birth:</strong>{" "}
-                {new Date(
-                  baptismalDetails.childDateOfBirth
-                ).toLocaleDateString()}
+                {new Date(baptismalDetails.dateOfBirth).toLocaleDateString()}
               </p>
             )}
             {baptismalDetails?.godMothers &&
@@ -156,7 +213,7 @@ export default function ManageEvents() {
                   <strong>God Mothers:</strong>{" "}
                   {baptismalDetails.godMothers
                     .map(
-                      //@ts-ignore
+                      // @ts-ignore
                       (godMother) =>
                         `${godMother.firstName} ${godMother.lastName}`
                     )
@@ -169,15 +226,17 @@ export default function ManageEvents() {
                   <strong>God Fathers:</strong>{" "}
                   {baptismalDetails.godFathers
                     .map(
-                      //@ts-ignore
+                      // @ts-ignore
                       (godFather) =>
                         `${godFather.firstName} ${godFather.lastName}`
                     )
                     .join(", ")}
                 </p>
               )}
+            {ministersSection}
           </div>
         );
+
       case "wedding":
         const weddingDetails = appointment?.wedding;
         return (
@@ -278,6 +337,7 @@ export default function ManageEvents() {
                 </p>
               </div>
             </div>
+            {ministersSection}
           </div>
         );
 
@@ -286,29 +346,33 @@ export default function ManageEvents() {
         return (
           <div>
             {confirmationDetails && (
-              <div>
-                <p>
-                  <strong>Name:</strong>{" "}
-                  {`${confirmationDetails.name.firstName} ${confirmationDetails.name.lastName}`}
-                </p>
-                {confirmationDetails.dateOfBirth && (
+              <>
+                <div>
                   <p>
-                    <strong>Date of Birth:</strong>{" "}
-                    {formatDate(
-                      new Date(
-                        confirmationDetails.dateOfBirth
-                      ).toLocaleDateString()
-                    )}
+                    <strong>Name:</strong>{" "}
+                    {`${confirmationDetails.name.firstName} ${confirmationDetails.name.lastName}`}
                   </p>
-                )}
-                <p>
-                  <strong>Contact Number:</strong>{" "}
-                  {confirmationDetails.contactNumber}
-                </p>
-              </div>
+                  {confirmationDetails.dateOfBirth && (
+                    <p>
+                      <strong>Date of Birth:</strong>{" "}
+                      {formatDate(
+                        new Date(
+                          confirmationDetails.dateOfBirth
+                        ).toLocaleDateString()
+                      )}
+                    </p>
+                  )}
+                  <p>
+                    <strong>Contact Number:</strong>{" "}
+                    {confirmationDetails.contactNumber}
+                  </p>
+                </div>
+                {ministersSection}
+              </>
             )}
           </div>
         );
+
       case "burial":
         const burialDetails = appointment?.burial.deceased;
         return (
@@ -337,8 +401,10 @@ export default function ManageEvents() {
                 {burialDetails.representativeContactNumber}
               </p>
             )}
+            {ministersSection}
           </div>
         );
+
       case "houseBlessing":
         const houseBlessingDetails = appointment?.houseBlessing.appointee;
         return (
@@ -359,8 +425,10 @@ export default function ManageEvents() {
                 </p>
               </div>
             )}
+            {ministersSection}
           </div>
         );
+
       default:
         return null;
     }
@@ -370,6 +438,7 @@ export default function ManageEvents() {
     // @ts-ignore
     (app) => app.status === "Accepted"
   );
+  // @ts-ignore
   const confirmedAppointments = appointments.filter(
     // @ts-ignore
     (app) => app.status === "Confirmed"
@@ -387,20 +456,37 @@ export default function ManageEvents() {
             ) : (
               acceptedAppointments.map((appointment) => (
                 <li
-                  key={
-                    // @ts-ignore
-                    appointment.id
-                  }
+                  // @ts-ignore
+                  key={appointment.id}
                   className="mb-4 w-full border border-gray-300/50 shadow-lg shadow-gray-300/20 rounded-md p-4"
                 >
                   <div className="flex w-full items-center justify-between">
                     <div>
-                      <h2 className="font-bold text-xl">
-                        {
-                          // @ts-ignore
-                          formatAppointmentType(appointment?.appointmentType)
-                        }
-                      </h2>
+                      <div className="flex items-center gap-x-2">
+                        <h2 className="font-bold text-xl">
+                          {/* @ts-ignore */}
+                          {formatAppointmentType(appointment?.appointmentType)}
+                        </h2>
+                        <p className="w-max h-max flex items-center text-[10px] gap-x-2 p-1 px-2 rounded-md bg-gray-200">
+                          <User size={10} color="gray" />
+                          {/* @ts-ignore */}
+                          {users.find((user) => user.id === appointment.userId)
+                            ? `${
+                                // @ts-ignore
+                                users.find(
+                                  // @ts-ignore
+                                  (user) => user.id === appointment.userId
+                                ).firstName
+                              } ${
+                                // @ts-ignore
+                                users.find(
+                                  // @ts-ignore
+                                  (user) => user.id === appointment.userId
+                                ).lastName
+                              }`
+                            : "User not found"}
+                        </p>
+                      </div>
                       <p>
                         {formatDate(
                           // @ts-ignore
@@ -416,40 +502,33 @@ export default function ManageEvents() {
                       >
                         <EyeIcon /> View Details
                       </Button>
-                      {
-                        // @ts-ignore
-                        appointment.status !== "Confirmed" && (
-                          <Button
-                            variant="outline"
-                            onClick={() => handleEditParticipants(appointment)}
-                            className="ml-2"
-                          >
-                            {getParticipantName("priest") !==
-                            `Select Priest` ? (
-                              <UserPen />
-                            ) : (
-                              <UserPen />
-                            )}{" "}
-                            {getParticipantName("priest") !== `Select Priest`
-                              ? "Edit Participants"
-                              : "Add Participants"}
-                          </Button>
-                        )
-                      }
-                      {
-                        // @ts-ignore
-                        appointment.status !== "Confirmed" && (
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              handleConfirmAppointment(appointment)
-                            } // Opens the confirm appointment dialog
-                            className="ml-2"
-                          >
-                            Confirm Appointment
-                          </Button>
-                        )
-                      }
+                      {/* @ts-ignore */}
+                      {appointment.status !== "Confirmed" && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleEditParticipants(appointment)}
+                          className="ml-2"
+                        >
+                          {getParticipantName("priest") !== `Select Priest` ? (
+                            <UserPen />
+                          ) : (
+                            <UserPen />
+                          )}{" "}
+                          {getParticipantName("priest") !== `Select Priest`
+                            ? "Edit Participants"
+                            : "Add Participants"}
+                        </Button>
+                      )}
+                      {/* @ts-ignore */}
+                      {appointment.status !== "Confirmed" && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleConfirmAppointment(appointment)}
+                          className="ml-2"
+                        >
+                          Confirm Appointment
+                        </Button>
+                      )}
                     </div>
                   </div>
                   <Dialog
@@ -480,14 +559,8 @@ export default function ManageEvents() {
                                   handleSelectParticipant("priest", user.id)
                                 }
                               >
-                                {
-                                  // @ts-ignore
-                                  user.firstName
-                                }{" "}
-                                {
-                                  // @ts-ignore
-                                  user.lastName
-                                }
+                                {/* @ts-ignore */}
+                                {user.firstName} {user.lastName}
                               </DropdownMenuItem>
                             ))}
                         </DropdownMenuContent>
@@ -514,14 +587,8 @@ export default function ManageEvents() {
                                   )
                                 }
                               >
-                                {
-                                  // @ts-ignore
-                                  user.firstName
-                                }{" "}
-                                {
-                                  // @ts-ignore
-                                  user.lastName
-                                }
+                                {/* @ts-ignore */}
+                                {user.firstName} {user.lastName}
                               </DropdownMenuItem>
                             ))}
                         </DropdownMenuContent>
@@ -534,6 +601,7 @@ export default function ManageEvents() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           {users
+                            // @ts-ignore
                             .filter(
                               // @ts-ignore
                               (user) => user.role === "altarServerPresident"
@@ -550,14 +618,8 @@ export default function ManageEvents() {
                                   )
                                 }
                               >
-                                {
-                                  // @ts-ignore
-                                  user.firstName
-                                }{" "}
-                                {
-                                  // @ts-ignore
-                                  user.lastName
-                                }
+                                {/* @ts-ignore */}
+                                {user.firstName} {user.lastName}
                               </DropdownMenuItem>
                             ))}
                         </DropdownMenuContent>
@@ -597,12 +659,31 @@ export default function ManageEvents() {
                 >
                   <div className="flex w-full items-center justify-between">
                     <div>
-                      <h2 className="font-bold text-xl">
-                        {
-                          // @ts-ignore
-                          formatAppointmentType(appointment?.appointmentType)
-                        }
-                      </h2>
+                      <div className="flex items-center gap-x-2">
+                        <h2 className="font-bold text-xl">
+                          {/* @ts-ignore */}
+                          {formatAppointmentType(appointment?.appointmentType)}
+                        </h2>
+                        <p className="w-max h-max flex items-center text-[10px] gap-x-2 p-1 px-2 rounded-md bg-gray-200">
+                          <User size={10} color="gray" />
+                          {/* @ts-ignore */}
+                          {users.find((user) => user.id === appointment.userId)
+                            ? `${
+                                // @ts-ignore
+                                users.find(
+                                  // @ts-ignore
+                                  (user) => user.id === appointment.userId
+                                ).firstName
+                              } ${
+                                // @ts-ignore
+                                users.find(
+                                  // @ts-ignore
+                                  (user) => user.id === appointment.userId
+                                ).lastName
+                              }`
+                            : "User not found"}
+                        </p>
+                      </div>
                       <p>
                         {formatDate(
                           // @ts-ignore
@@ -637,12 +718,11 @@ export default function ManageEvents() {
         </div>
       </div>
 
-      {/* Confirmation Dialog */}
       <Dialog
-        open={!!confirmationAppointment} // Open if confirmationAppointment is set
+        open={!!confirmationAppointment}
         onOpenChange={(open) => {
           if (!open) {
-            setConfirmationAppointment(null); // Reset appointment when closing dialog
+            setConfirmationAppointment(null);
           }
         }}
       >
@@ -654,7 +734,7 @@ export default function ManageEvents() {
           <div className="flex justify-end mt-4">
             <Button
               variant="outline"
-              onClick={() => setConfirmationAppointment(null)} // Close dialog
+              onClick={() => setConfirmationAppointment(null)}
               className="mr-2"
             >
               Cancel

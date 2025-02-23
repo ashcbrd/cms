@@ -29,14 +29,28 @@ const AppointmentsPage = () => {
     const fetchAppointments = async () => {
       try {
         setLoading(true);
-        const appointmentCollection = collection(db, "appointments");
-        const snapshot = await getDocs(appointmentCollection);
-        const appointmentsData = snapshot.docs.map((doc) => ({
+
+        const appointmentsRef = collection(db, "appointments");
+        const appointmentsSnap = await getDocs(appointmentsRef);
+
+        const appointmentsData = appointmentsSnap.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        // @ts-ignore
-        setAppointments(appointmentsData);
+
+        const userId = auth.currentUser ? auth.currentUser.uid : null;
+        if (userId) {
+          const filteredAppointments = appointmentsData.filter(
+            // @ts-ignore
+            (appointment) => appointment.userId === userId
+          );
+          // @ts-ignore
+          setAppointments(filteredAppointments);
+        } else {
+          setError(
+            "User not authenticated. Please log in to view appointments."
+          );
+        }
       } catch (err) {
         setError((err as Error).message);
       } finally {

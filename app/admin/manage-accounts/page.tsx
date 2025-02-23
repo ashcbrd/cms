@@ -119,12 +119,21 @@ const ManageAccounts: React.FC = () => {
   }, [searchTerm, selectedRoles, users]);
 
   const handleRoleChange = (role: string) => {
-    //@ts-ignore
+    // @ts-ignore
     setSelectedRoles((prev) => ({ ...prev, [role]: !prev[role] }));
   };
 
   const openEditDialog = (user: any) => {
     setEditUser(user);
+    setNewUser({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      address: user.address,
+      contactNumber: user.contactNumber,
+      role: user.role,
+      password: "",
+    });
     setIsEditDialogOpen(true);
   };
 
@@ -191,12 +200,20 @@ const ManageAccounts: React.FC = () => {
       console.error("Error creating user:", error);
     }
   };
-
   const handleEditUser = async () => {
-    if (!editUser?.firstName || !editUser?.lastName || !editUser?.email) return;
+    if (!newUser.firstName || !newUser.lastName || !newUser.email) return;
 
     const userRef = doc(db, "users", editUser.id);
-    await updateDoc(userRef, editUser);
+    const updatedUser = {
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      email: newUser.email,
+      address: newUser.address,
+      contactNumber: newUser.contactNumber,
+      role: newUser.role,
+    };
+
+    await updateDoc(userRef, updatedUser);
     fetchUsers();
     setIsEditDialogOpen(false);
     setEditUser(null);
@@ -225,6 +242,16 @@ const ManageAccounts: React.FC = () => {
     );
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editUser) {
+      handleEditUser();
+    } else {
+      handleCreateUser();
+    }
+    setIsEditDialogOpen(false);
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4">Manage Accounts</h1>
@@ -237,7 +264,22 @@ const ManageAccounts: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogTrigger asChild onClick={() => setIsEditDialogOpen(true)}>
+          <DialogTrigger
+            asChild
+            onClick={() => {
+              setNewUser({
+                firstName: "",
+                lastName: "",
+                email: "",
+                address: "",
+                contactNumber: "",
+                role: "",
+                password: "",
+              });
+              setEditUser(null);
+              setIsEditDialogOpen(true);
+            }}
+          >
             <Button className="flex items-center">
               <UserPlus /> Add User
             </Button>
@@ -246,14 +288,7 @@ const ManageAccounts: React.FC = () => {
             <DialogHeader>
               <DialogTitle>{editUser ? "Edit User" : "Add User"}</DialogTitle>
             </DialogHeader>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleCreateUser();
-                setIsEditDialogOpen(false);
-              }}
-              className="w-full flex flex-col"
-            >
+            <form onSubmit={handleSubmit} className="w-full flex flex-col">
               <Input
                 type="text"
                 id="firstName"
@@ -364,7 +399,7 @@ const ManageAccounts: React.FC = () => {
                 </DropdownMenu>
               </div>
               <Button type="submit" className="ml-auto">
-                Create User
+                Submit
               </Button>
             </form>
           </DialogContent>
@@ -424,7 +459,9 @@ const ManageAccounts: React.FC = () => {
             >
               <div>
                 {highlightText(
-                  `${user.firstName} ${user.lastName} (${user.email})`
+                  `${user.firstName} ${user.lastName && user.lastName} (${
+                    user.email
+                  })`
                 )}{" "}
                 -{" "}
                 <span className="text-sm bg-gray-100 px-2 py-1 rounded-md">
@@ -432,25 +469,18 @@ const ManageAccounts: React.FC = () => {
                 </span>
               </div>
               <div className="flex items-center gap-x-2">
-                {user.role !== "parishioner" && (
-                  <>
-                    <Button
-                      variant="outline"
-                      onClick={() => openEditDialog(user)}
-                    >
-                      <UserPen />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setUserToDelete(user);
-                        setIsDeleteDialogOpen(true);
-                      }}
-                    >
-                      <Trash />
-                    </Button>
-                  </>
-                )}
+                <Button variant="outline" onClick={() => openEditDialog(user)}>
+                  <UserPen />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setUserToDelete(user);
+                    setIsDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash />
+                </Button>
               </div>
             </li>
           );
