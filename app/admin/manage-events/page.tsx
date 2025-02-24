@@ -134,8 +134,34 @@ export default function ManageEvents() {
   };
   // @ts-ignore
   const renderDetails = (appointment) => {
+    const parishionerSection = (
+      <div className="mb-6">
+        <h3 className="text-xl font-bold">Appointment Setter</h3>
+        <Separator className="my-2" />
+        <div>
+          {appointment.userId && (
+            <p>
+              <strong>Name:</strong> {/*  @ts-ignore */}
+              {users.find((user) => user.id === appointment.userId)
+                ? `${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.userId)
+                      .firstName
+                  } ${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.userId)
+                      .lastName
+                  }`
+                : "Priest not found"}
+            </p>
+          )}
+        </div>
+      </div>
+    );
     const ministersSection = (
       <div className="mt-6">
+        <h3 className="text-xl font-bold">Ministers</h3>
+        <Separator className="my-2" />
         <div className="flex flex-col">
           {appointment.priestId && (
             <p>
@@ -201,6 +227,7 @@ export default function ManageEvents() {
         const baptismalDetails = appointment?.baptismal.child;
         return (
           <div>
+            {parishionerSection}
             {baptismalDetails?.dateOfBirth && (
               <p className="w-max">
                 <strong>Child Date of Birth:</strong>{" "}
@@ -233,111 +260,124 @@ export default function ManageEvents() {
                     .join(", ")}
                 </p>
               )}
-            {ministersSection}
+            {(appointment.priestId ||
+              appointment.altarServerId ||
+              appointment.altarServerPresidentId) &&
+              ministersSection}
           </div>
         );
 
       case "wedding":
         const weddingDetails = appointment?.wedding;
         return (
-          <div className="flex gap-x-10">
-            <div>
-              <h3 className="text-lg font-bold">Bride Details</h3>
-              <div className="mt-4">
-                <p className="w-max">
-                  <strong>Name:</strong>{" "}
-                  {`${weddingDetails.bride.name.firstName} ${weddingDetails.bride.name.lastName}`}
-                </p>
-                {weddingDetails.bride.dateOfBirth && (
+          <div className="flex flex-col">
+            {parishionerSection}
+            <div className="flex gap-x-10">
+              <div>
+                <h3 className="text-lg font-bold">Bride Details</h3>
+                <Separator className="my-2" />
+                <div className="mt-4">
                   <p className="w-max">
-                    <strong>Date of Birth:</strong>{" "}
-                    {formatDate(
-                      new Date(
-                        weddingDetails.bride.dateOfBirth
-                      ).toLocaleDateString()
-                    )}
+                    <strong>Name:</strong>{" "}
+                    {`${weddingDetails.bride.name.firstName} ${weddingDetails.bride.name.lastName}`}
                   </p>
-                )}
-                <p className="w-max">
-                  <strong>Address:</strong> {weddingDetails.bride.address}
-                </p>
-                <p className="w-max">
-                  <strong>Citizenship:</strong>{" "}
-                  {weddingDetails.bride.citizenship}
-                </p>
-                <p className="w-max">
-                  <strong>Civil Status:</strong>{" "}
-                  {weddingDetails.bride.civilStatus}
-                </p>
-                <p className="w-max">
-                  <strong>Occupation:</strong> {weddingDetails.bride.occupation}
-                </p>
-                <p className="w-max">
-                  <strong>Place of Birth:</strong>{" "}
-                  {weddingDetails.bride.placeOfBirth}
-                </p>
-                <p className="w-max">
-                  <strong>Religion:</strong> {weddingDetails.bride.religion}
-                </p>
-                <p className="w-max">
-                  <strong>Father's Name:</strong>{" "}
-                  {`${weddingDetails.bride.father.firstName} ${weddingDetails.bride.father.lastName}`}
-                </p>
-                <p className="w-max">
-                  <strong>Mother's Name:</strong>{" "}
-                  {`${weddingDetails.bride.mother.firstName} ${weddingDetails.bride.mother.lastName}`}
-                </p>
+                  {weddingDetails.bride.dateOfBirth && (
+                    <p className="w-max">
+                      <strong>Date of Birth:</strong>{" "}
+                      {formatDate(
+                        new Date(
+                          weddingDetails.bride.dateOfBirth
+                        ).toLocaleDateString()
+                      )}
+                    </p>
+                  )}
+                  <p className="w-max">
+                    <strong>Address:</strong> {weddingDetails.bride.address}
+                  </p>
+                  <p className="w-max">
+                    <strong>Citizenship:</strong>{" "}
+                    {weddingDetails.bride.citizenship}
+                  </p>
+                  <p className="w-max">
+                    <strong>Civil Status:</strong>{" "}
+                    {weddingDetails.bride.civilStatus}
+                  </p>
+                  <p className="w-max">
+                    <strong>Occupation:</strong>{" "}
+                    {weddingDetails.bride.occupation}
+                  </p>
+                  <p className="w-max">
+                    <strong>Place of Birth:</strong>{" "}
+                    {weddingDetails.bride.placeOfBirth}
+                  </p>
+                  <p className="w-max">
+                    <strong>Religion:</strong> {weddingDetails.bride.religion}
+                  </p>
+                  <p className="w-max">
+                    <strong>Father's Name:</strong>{" "}
+                    {`${weddingDetails.bride.father.firstName} ${weddingDetails.bride.father.lastName}`}
+                  </p>
+                  <p className="w-max">
+                    <strong>Mother's Name:</strong>{" "}
+                    {`${weddingDetails.bride.mother.firstName} ${weddingDetails.bride.mother.lastName}`}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Groom Details</h3>
+                <Separator className="my-2" />
+                <div className="mt-4">
+                  <p className="w-max">
+                    <strong>Name:</strong>{" "}
+                    {`${weddingDetails.groom.name.firstName} ${weddingDetails.groom.name.lastName}`}
+                  </p>
+                  {weddingDetails.groom.dateOfBirth && (
+                    <p className="w-max">
+                      <strong>Date of Birth:</strong>{" "}
+                      {formatDate(
+                        new Date(
+                          weddingDetails.groom.dateOfBirth
+                        ).toLocaleDateString()
+                      )}
+                    </p>
+                  )}
+                  <p className="w-max">
+                    <strong>Address:</strong> {weddingDetails.groom.address}
+                  </p>
+                  <p className="w-max">
+                    <strong>Citizenship:</strong>{" "}
+                    {weddingDetails.groom.citizenship}
+                  </p>
+                  <p className="w-max">
+                    <strong>Civil Status:</strong>{" "}
+                    {weddingDetails.groom.civilStatus}
+                  </p>
+                  <p className="w-max">
+                    <strong>Occupation:</strong>{" "}
+                    {weddingDetails.groom.occupation}
+                  </p>
+                  <p className="w-max">
+                    <strong>Place of Birth:</strong>{" "}
+                    {weddingDetails.groom.placeOfBirth}
+                  </p>
+                  <p className="w-max">
+                    <strong>Religion:</strong> {weddingDetails.groom.religion}
+                  </p>
+                  <p className="w-max">
+                    <strong>Father's Name:</strong>{" "}
+                    {`${weddingDetails.groom.father.firstName} ${weddingDetails.groom.father.lastName}`}
+                  </p>
+                  <p className="w-max">
+                    <strong>Mother's Name:</strong>{" "}
+                    {`${weddingDetails.groom.mother.firstName} ${weddingDetails.groom.mother.lastName}`}
+                  </p>
+                </div>
               </div>
             </div>
-            <div>
-              <h3 className="font-bold text-lg">Groom Details</h3>
-              <div className="mt-4">
-                <p className="w-max">
-                  <strong>Name:</strong>{" "}
-                  {`${weddingDetails.groom.name.firstName} ${weddingDetails.groom.name.lastName}`}
-                </p>
-                {weddingDetails.groom.dateOfBirth && (
-                  <p className="w-max">
-                    <strong>Date of Birth:</strong>{" "}
-                    {formatDate(
-                      new Date(
-                        weddingDetails.groom.dateOfBirth
-                      ).toLocaleDateString()
-                    )}
-                  </p>
-                )}
-                <p className="w-max">
-                  <strong>Address:</strong> {weddingDetails.groom.address}
-                </p>
-                <p className="w-max">
-                  <strong>Citizenship:</strong>{" "}
-                  {weddingDetails.groom.citizenship}
-                </p>
-                <p className="w-max">
-                  <strong>Civil Status:</strong>{" "}
-                  {weddingDetails.groom.civilStatus}
-                </p>
-                <p className="w-max">
-                  <strong>Occupation:</strong> {weddingDetails.groom.occupation}
-                </p>
-                <p className="w-max">
-                  <strong>Place of Birth:</strong>{" "}
-                  {weddingDetails.groom.placeOfBirth}
-                </p>
-                <p className="w-max">
-                  <strong>Religion:</strong> {weddingDetails.groom.religion}
-                </p>
-                <p className="w-max">
-                  <strong>Father's Name:</strong>{" "}
-                  {`${weddingDetails.groom.father.firstName} ${weddingDetails.groom.father.lastName}`}
-                </p>
-                <p className="w-max">
-                  <strong>Mother's Name:</strong>{" "}
-                  {`${weddingDetails.groom.mother.firstName} ${weddingDetails.groom.mother.lastName}`}
-                </p>
-              </div>
-            </div>
-            {ministersSection}
+            {(appointment.priestId ||
+              appointment.altarServerId ||
+              appointment.altarServerPresidentId) &&
+              ministersSection}
           </div>
         );
 
@@ -345,8 +385,11 @@ export default function ManageEvents() {
         const confirmationDetails = appointment?.confirmation.confirmant;
         return (
           <div>
+            {parishionerSection}
             {confirmationDetails && (
               <>
+                <h3 className="text-xl font-bold">Event Details</h3>
+                <Separator className="my-2" />
                 <div>
                   <p>
                     <strong>Name:</strong>{" "}
@@ -367,7 +410,10 @@ export default function ManageEvents() {
                     {confirmationDetails.contactNumber}
                   </p>
                 </div>
-                {ministersSection}
+                {(appointment.priestId ||
+                  appointment.altarServerId ||
+                  appointment.altarServerPresidentId) &&
+                  ministersSection}
               </>
             )}
           </div>
@@ -376,56 +422,70 @@ export default function ManageEvents() {
       case "burial":
         const burialDetails = appointment?.burial.deceased;
         return (
-          <div>
-            {burialDetails?.dateOfBirth && (
-              <p className="w-max">
-                <strong>Date of Birth:</strong>{" "}
-                {new Date(burialDetails.dateOfBirth).toLocaleString()}
-              </p>
-            )}
-            {burialDetails?.dateOfDeath && (
-              <p className="w-max">
-                <strong>Date of Death:</strong>{" "}
-                {new Date(burialDetails.dateOfDeath).toLocaleString()}
-              </p>
-            )}
-            {burialDetails?.name && (
-              <p className="w-max">
-                <strong>Name:</strong>{" "}
-                {`${burialDetails.name.firstName} ${burialDetails.name.lastName}`}
-              </p>
-            )}
-            {burialDetails?.representativeContactNumber && (
-              <p className="w-max">
-                <strong>Representative Contact Number:</strong>{" "}
-                {burialDetails.representativeContactNumber}
-              </p>
-            )}
-            {ministersSection}
+          <div className="flex flex-col">
+            {parishionerSection}
+            <div>
+              {burialDetails?.dateOfBirth && (
+                <p className="w-max">
+                  <strong>Date of Birth:</strong>{" "}
+                  {new Date(burialDetails.dateOfBirth).toLocaleString()}
+                </p>
+              )}
+              {burialDetails?.dateOfDeath && (
+                <p className="w-max">
+                  <strong>Date of Death:</strong>{" "}
+                  {new Date(burialDetails.dateOfDeath).toLocaleString()}
+                </p>
+              )}
+              {burialDetails?.name && (
+                <p className="w-max">
+                  <strong>Name:</strong>{" "}
+                  {`${burialDetails.name.firstName} ${burialDetails.name.lastName}`}
+                </p>
+              )}
+              {burialDetails?.representativeContactNumber && (
+                <p className="w-max">
+                  <strong>Representative Contact Number:</strong>{" "}
+                  {burialDetails.representativeContactNumber}
+                </p>
+              )}
+              {(appointment.priestId ||
+                appointment.altarServerId ||
+                appointment.altarServerPresidentId) &&
+                ministersSection}
+            </div>
           </div>
         );
 
       case "houseBlessing":
         const houseBlessingDetails = appointment?.houseBlessing.appointee;
         return (
-          <div>
-            {houseBlessingDetails && (
-              <div>
-                <p>
-                  <strong>Name:</strong>{" "}
-                  {`${houseBlessingDetails.name.firstName} ${houseBlessingDetails.name.lastName}`}
-                </p>
-                <p>
-                  <strong>Contact Number:</strong>{" "}
-                  {houseBlessingDetails.contactNumber}
-                </p>
-                <p>
-                  <strong>House Address:</strong>{" "}
-                  {houseBlessingDetails.houseAddress}
-                </p>
-              </div>
-            )}
-            {ministersSection}
+          <div className="flex flex-col">
+            {parishionerSection}
+            <div>
+              {houseBlessingDetails && (
+                <div>
+                  <h3 className="text-xl font-bold">Event Details</h3>
+                  <Separator className="my-2" />
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {`${houseBlessingDetails.name.firstName} ${houseBlessingDetails.name.lastName}`}
+                  </p>
+                  <p>
+                    <strong>Contact Number:</strong>{" "}
+                    {houseBlessingDetails.contactNumber}
+                  </p>
+                  <p>
+                    <strong>House Address:</strong>{" "}
+                    {houseBlessingDetails.houseAddress}
+                  </p>
+                </div>
+              )}
+              {(appointment.priestId ||
+                appointment.altarServerId ||
+                appointment.altarServerPresidentId) &&
+                ministersSection}
+            </div>
           </div>
         );
 
@@ -525,6 +585,14 @@ export default function ManageEvents() {
                           variant="outline"
                           onClick={() => handleConfirmAppointment(appointment)}
                           className="ml-2"
+                          disabled={
+                            // @ts-ignore
+                            !appointment.altarServerId &&
+                            // @ts-ignore
+                            !appointment.altarServerPresidentId &&
+                            // @ts-ignore
+                            !appointment.priestId
+                          }
                         >
                           Confirm Appointment
                         </Button>

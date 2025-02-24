@@ -18,6 +18,7 @@ import { formatAppointmentType } from "@/lib/format-appointment-type";
 import { formatDate } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
 // import twilio from "twilio";
 
 const ManageAppointmentsPage = () => {
@@ -107,17 +108,104 @@ const ManageAppointmentsPage = () => {
 
   //@ts-ignore
   const renderDetails = (appointment) => {
+    const parishionerSection = (
+      <div className="mb-6">
+        <h3 className="text-xl font-bold">Appointment Setter</h3>
+        <Separator className="my-2" />
+        <div>
+          {appointment.userId && (
+            <p>
+              <strong>Name:</strong> {/*  @ts-ignore */}
+              {users.find((user) => user.id === appointment.userId)
+                ? `${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.userId)
+                      .firstName
+                  } ${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.userId)
+                      .lastName
+                  }`
+                : "Priest not found"}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+    const ministersSection = (
+      <div className="mt-6">
+        <h3 className="text-xl font-bold">Ministers</h3>
+        <Separator className="my-2" />
+        <div className="flex flex-col">
+          {appointment.priestId && (
+            <p>
+              <strong>Priest:</strong> {/*  @ts-ignore */}
+              {users.find((user) => user.id === appointment.priestId)
+                ? `${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.priestId)
+                      .firstName
+                  } ${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.priestId)
+                      .lastName
+                  }`
+                : "Priest not found"}
+            </p>
+          )}
+          {appointment.altarServerId && (
+            <p>
+              <strong>Altar Server:</strong> {/* @ts-ignore */}
+              {users.find((user) => user.id === appointment.altarServerId)
+                ? `${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.altarServerId)
+                      .firstName
+                  } ${
+                    // @ts-ignore
+                    users.find((user) => user.id === appointment.altarServerId)
+                      .lastName
+                  }`
+                : "Altar Server not found"}
+            </p>
+          )}
+          {appointment.altarServerPresidentId && (
+            <p>
+              <strong>Altar Server President:</strong> {/* @ts-ignore */}
+              {users.find(
+                // @ts-ignore
+                (user) => user.id === appointment.altarServerPresidentId
+              )
+                ? `${
+                    // @ts-ignore
+                    users.find(
+                      // @ts-ignore
+                      (user) => user.id === appointment.altarServerPresidentId
+                    ).firstName
+                  } ${
+                    // @ts-ignore
+                    users.find(
+                      // @ts-ignore
+                      (user) => user.id === appointment.altarServerPresidentId
+                    ).lastName
+                  }`
+                : "Altar Server President not found"}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+
     switch (appointment.appointmentType) {
       case "baptismal":
         const baptismalDetails = appointment?.baptismal.child;
         return (
           <div>
+            {parishionerSection}
             {baptismalDetails?.dateOfBirth && (
               <p className="w-max">
                 <strong>Child Date of Birth:</strong>{" "}
-                {new Date(
-                  baptismalDetails.childDateOfBirth
-                ).toLocaleDateString()}
+                {new Date(baptismalDetails.dateOfBirth).toLocaleDateString()}
               </p>
             )}
             {baptismalDetails?.godMothers &&
@@ -126,7 +214,7 @@ const ManageAppointmentsPage = () => {
                   <strong>God Mothers:</strong>{" "}
                   {baptismalDetails.godMothers
                     .map(
-                      //@ts-ignore
+                      // @ts-ignore
                       (godMother) =>
                         `${godMother.firstName} ${godMother.lastName}`
                     )
@@ -139,115 +227,131 @@ const ManageAppointmentsPage = () => {
                   <strong>God Fathers:</strong>{" "}
                   {baptismalDetails.godFathers
                     .map(
-                      //@ts-ignore
+                      // @ts-ignore
                       (godFather) =>
                         `${godFather.firstName} ${godFather.lastName}`
                     )
                     .join(", ")}
                 </p>
               )}
+            {(appointment.priestId ||
+              appointment.altarServerId ||
+              appointment.altarServerPresidentId) &&
+              ministersSection}
           </div>
         );
+
       case "wedding":
         const weddingDetails = appointment?.wedding;
         return (
-          <div className="flex gap-x-10">
-            <div>
-              <h3 className="text-lg font-bold">Bride Details</h3>
-              <div className="mt-4">
-                <p className="w-max">
-                  <strong>Name:</strong>{" "}
-                  {`${weddingDetails.bride.name.firstName} ${weddingDetails.bride.name.lastName}`}
-                </p>
-                {weddingDetails.bride.dateOfBirth && (
+          <div className="flex flex-col">
+            {parishionerSection}
+            <div className="flex gap-x-10">
+              <div>
+                <h3 className="text-lg font-bold">Bride Details</h3>
+                <Separator className="my-2" />
+                <div className="mt-4">
                   <p className="w-max">
-                    <strong>Date of Birth:</strong>{" "}
-                    {formatDate(
-                      new Date(
-                        weddingDetails.bride.dateOfBirth
-                      ).toLocaleDateString()
-                    )}
+                    <strong>Name:</strong>{" "}
+                    {`${weddingDetails.bride.name.firstName} ${weddingDetails.bride.name.lastName}`}
                   </p>
-                )}
-                <p className="w-max">
-                  <strong>Address:</strong> {weddingDetails.bride.address}
-                </p>
-                <p className="w-max">
-                  <strong>Citizenship:</strong>{" "}
-                  {weddingDetails.bride.citizenship}
-                </p>
-                <p className="w-max">
-                  <strong>Civil Status:</strong>{" "}
-                  {weddingDetails.bride.civilStatus}
-                </p>
-                <p className="w-max">
-                  <strong>Occupation:</strong> {weddingDetails.bride.occupation}
-                </p>
-                <p className="w-max">
-                  <strong>Place of Birth:</strong>{" "}
-                  {weddingDetails.bride.placeOfBirth}
-                </p>
-                <p className="w-max">
-                  <strong>Religion:</strong> {weddingDetails.bride.religion}
-                </p>
-                <p className="w-max">
-                  <strong>Father's Name:</strong>{" "}
-                  {`${weddingDetails.bride.father.firstName} ${weddingDetails.bride.father.lastName}`}
-                </p>
-                <p className="w-max">
-                  <strong>Mother's Name:</strong>{" "}
-                  {`${weddingDetails.bride.mother.firstName} ${weddingDetails.bride.mother.lastName}`}
-                </p>
+                  {weddingDetails.bride.dateOfBirth && (
+                    <p className="w-max">
+                      <strong>Date of Birth:</strong>{" "}
+                      {formatDate(
+                        new Date(
+                          weddingDetails.bride.dateOfBirth
+                        ).toLocaleDateString()
+                      )}
+                    </p>
+                  )}
+                  <p className="w-max">
+                    <strong>Address:</strong> {weddingDetails.bride.address}
+                  </p>
+                  <p className="w-max">
+                    <strong>Citizenship:</strong>{" "}
+                    {weddingDetails.bride.citizenship}
+                  </p>
+                  <p className="w-max">
+                    <strong>Civil Status:</strong>{" "}
+                    {weddingDetails.bride.civilStatus}
+                  </p>
+                  <p className="w-max">
+                    <strong>Occupation:</strong>{" "}
+                    {weddingDetails.bride.occupation}
+                  </p>
+                  <p className="w-max">
+                    <strong>Place of Birth:</strong>{" "}
+                    {weddingDetails.bride.placeOfBirth}
+                  </p>
+                  <p className="w-max">
+                    <strong>Religion:</strong> {weddingDetails.bride.religion}
+                  </p>
+                  <p className="w-max">
+                    <strong>Father's Name:</strong>{" "}
+                    {`${weddingDetails.bride.father.firstName} ${weddingDetails.bride.father.lastName}`}
+                  </p>
+                  <p className="w-max">
+                    <strong>Mother's Name:</strong>{" "}
+                    {`${weddingDetails.bride.mother.firstName} ${weddingDetails.bride.mother.lastName}`}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">Groom Details</h3>
+                <Separator className="my-2" />
+                <div className="mt-4">
+                  <p className="w-max">
+                    <strong>Name:</strong>{" "}
+                    {`${weddingDetails.groom.name.firstName} ${weddingDetails.groom.name.lastName}`}
+                  </p>
+                  {weddingDetails.groom.dateOfBirth && (
+                    <p className="w-max">
+                      <strong>Date of Birth:</strong>{" "}
+                      {formatDate(
+                        new Date(
+                          weddingDetails.groom.dateOfBirth
+                        ).toLocaleDateString()
+                      )}
+                    </p>
+                  )}
+                  <p className="w-max">
+                    <strong>Address:</strong> {weddingDetails.groom.address}
+                  </p>
+                  <p className="w-max">
+                    <strong>Citizenship:</strong>{" "}
+                    {weddingDetails.groom.citizenship}
+                  </p>
+                  <p className="w-max">
+                    <strong>Civil Status:</strong>{" "}
+                    {weddingDetails.groom.civilStatus}
+                  </p>
+                  <p className="w-max">
+                    <strong>Occupation:</strong>{" "}
+                    {weddingDetails.groom.occupation}
+                  </p>
+                  <p className="w-max">
+                    <strong>Place of Birth:</strong>{" "}
+                    {weddingDetails.groom.placeOfBirth}
+                  </p>
+                  <p className="w-max">
+                    <strong>Religion:</strong> {weddingDetails.groom.religion}
+                  </p>
+                  <p className="w-max">
+                    <strong>Father's Name:</strong>{" "}
+                    {`${weddingDetails.groom.father.firstName} ${weddingDetails.groom.father.lastName}`}
+                  </p>
+                  <p className="w-max">
+                    <strong>Mother's Name:</strong>{" "}
+                    {`${weddingDetails.groom.mother.firstName} ${weddingDetails.groom.mother.lastName}`}
+                  </p>
+                </div>
               </div>
             </div>
-            <div>
-              <h3 className="font-bold text-lg">Groom Details</h3>
-              <div className="mt-4">
-                <p className="w-max">
-                  <strong>Name:</strong>{" "}
-                  {`${weddingDetails.groom.name.firstName} ${weddingDetails.groom.name.lastName}`}
-                </p>
-                {weddingDetails.groom.dateOfBirth && (
-                  <p className="w-max">
-                    <strong>Date of Birth:</strong>{" "}
-                    {formatDate(
-                      new Date(
-                        weddingDetails.groom.dateOfBirth
-                      ).toLocaleDateString()
-                    )}
-                  </p>
-                )}
-                <p className="w-max">
-                  <strong>Address:</strong> {weddingDetails.groom.address}
-                </p>
-                <p className="w-max">
-                  <strong>Citizenship:</strong>{" "}
-                  {weddingDetails.groom.citizenship}
-                </p>
-                <p className="w-max">
-                  <strong>Civil Status:</strong>{" "}
-                  {weddingDetails.groom.civilStatus}
-                </p>
-                <p className="w-max">
-                  <strong>Occupation:</strong> {weddingDetails.groom.occupation}
-                </p>
-                <p className="w-max">
-                  <strong>Place of Birth:</strong>{" "}
-                  {weddingDetails.groom.placeOfBirth}
-                </p>
-                <p className="w-max">
-                  <strong>Religion:</strong> {weddingDetails.groom.religion}
-                </p>
-                <p className="w-max">
-                  <strong>Father's Name:</strong>{" "}
-                  {`${weddingDetails.groom.father.firstName} ${weddingDetails.groom.father.lastName}`}
-                </p>
-                <p className="w-max">
-                  <strong>Mother's Name:</strong>{" "}
-                  {`${weddingDetails.groom.mother.firstName} ${weddingDetails.groom.mother.lastName}`}
-                </p>
-              </div>
-            </div>
+            {(appointment.priestId ||
+              appointment.altarServerId ||
+              appointment.altarServerPresidentId) &&
+              ministersSection}
           </div>
         );
 
@@ -255,82 +359,110 @@ const ManageAppointmentsPage = () => {
         const confirmationDetails = appointment?.confirmation.confirmant;
         return (
           <div>
+            {parishionerSection}
             {confirmationDetails && (
-              <div>
-                <p>
-                  <strong>Name:</strong>{" "}
-                  {`${confirmationDetails.name.firstName} ${confirmationDetails.name.lastName}`}
-                </p>
-                {confirmationDetails.dateOfBirth && (
+              <>
+                <h3 className="text-xl font-bold">Event Details</h3>
+                <Separator className="my-2" />
+                <div>
                   <p>
-                    <strong>Date of Birth:</strong>{" "}
-                    {formatDate(
-                      new Date(
-                        confirmationDetails.dateOfBirth
-                      ).toLocaleDateString()
-                    )}
+                    <strong>Name:</strong>{" "}
+                    {`${confirmationDetails.name.firstName} ${confirmationDetails.name.lastName}`}
                   </p>
-                )}
-                <p>
-                  <strong>Contact Number:</strong>{" "}
-                  {confirmationDetails.contactNumber}
-                </p>
-              </div>
+                  {confirmationDetails.dateOfBirth && (
+                    <p>
+                      <strong>Date of Birth:</strong>{" "}
+                      {formatDate(
+                        new Date(
+                          confirmationDetails.dateOfBirth
+                        ).toLocaleDateString()
+                      )}
+                    </p>
+                  )}
+                  <p>
+                    <strong>Contact Number:</strong>{" "}
+                    {confirmationDetails.contactNumber}
+                  </p>
+                </div>
+                {(appointment.priestId ||
+                  appointment.altarServerId ||
+                  appointment.altarServerPresidentId) &&
+                  ministersSection}
+              </>
             )}
           </div>
         );
+
       case "burial":
         const burialDetails = appointment?.burial.deceased;
         return (
-          <div>
-            {burialDetails?.dateOfBirth && (
-              <p className="w-max">
-                <strong>Date of Birth:</strong>{" "}
-                {new Date(burialDetails.dateOfBirth).toLocaleString()}
-              </p>
-            )}
-            {burialDetails?.dateOfDeath && (
-              <p className="w-max">
-                <strong>Date of Death:</strong>{" "}
-                {new Date(burialDetails.dateOfDeath).toLocaleString()}
-              </p>
-            )}
-            {burialDetails?.name && (
-              <p className="w-max">
-                <strong>Name:</strong>{" "}
-                {`${burialDetails.name.firstName} ${burialDetails.name.lastName}`}
-              </p>
-            )}
-            {burialDetails?.representativeContactNumber && (
-              <p className="w-max">
-                <strong>Representative Contact Number:</strong>{" "}
-                {burialDetails.representativeContactNumber}
-              </p>
-            )}
+          <div className="flex flex-col">
+            {parishionerSection}
+            <div>
+              {burialDetails?.dateOfBirth && (
+                <p className="w-max">
+                  <strong>Date of Birth:</strong>{" "}
+                  {new Date(burialDetails.dateOfBirth).toLocaleString()}
+                </p>
+              )}
+              {burialDetails?.dateOfDeath && (
+                <p className="w-max">
+                  <strong>Date of Death:</strong>{" "}
+                  {new Date(burialDetails.dateOfDeath).toLocaleString()}
+                </p>
+              )}
+              {burialDetails?.name && (
+                <p className="w-max">
+                  <strong>Name:</strong>{" "}
+                  {`${burialDetails.name.firstName} ${burialDetails.name.lastName}`}
+                </p>
+              )}
+              {burialDetails?.representativeContactNumber && (
+                <p className="w-max">
+                  <strong>Representative Contact Number:</strong>{" "}
+                  {burialDetails.representativeContactNumber}
+                </p>
+              )}
+              {(appointment.priestId ||
+                appointment.altarServerId ||
+                appointment.altarServerPresidentId) &&
+                ministersSection}
+            </div>
           </div>
         );
+
       case "houseBlessing":
         const houseBlessingDetails = appointment?.houseBlessing.appointee;
         return (
-          <div>
-            {houseBlessingDetails && (
-              <div>
-                <p>
-                  <strong>Name:</strong>{" "}
-                  {`${houseBlessingDetails.name.firstName} ${houseBlessingDetails.name.lastName}`}
-                </p>
-                <p>
-                  <strong>Contact Number:</strong>{" "}
-                  {houseBlessingDetails.contactNumber}
-                </p>
-                <p>
-                  <strong>House Address:</strong>{" "}
-                  {houseBlessingDetails.houseAddress}
-                </p>
-              </div>
-            )}
+          <div className="flex flex-col">
+            {parishionerSection}
+            <div>
+              {houseBlessingDetails && (
+                <div>
+                  <h3 className="text-xl font-bold">Event Details</h3>
+                  <Separator className="my-2" />
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {`${houseBlessingDetails.name.firstName} ${houseBlessingDetails.name.lastName}`}
+                  </p>
+                  <p>
+                    <strong>Contact Number:</strong>{" "}
+                    {houseBlessingDetails.contactNumber}
+                  </p>
+                  <p>
+                    <strong>House Address:</strong>{" "}
+                    {houseBlessingDetails.houseAddress}
+                  </p>
+                </div>
+              )}
+              {(appointment.priestId ||
+                appointment.altarServerId ||
+                appointment.altarServerPresidentId) &&
+                ministersSection}
+            </div>
           </div>
         );
+
       default:
         return null;
     }
