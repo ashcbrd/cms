@@ -21,6 +21,7 @@ const AppointmentsPage = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [users, setUsers] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
@@ -47,6 +48,14 @@ const AppointmentsPage = () => {
           );
           // @ts-ignore
           setAppointments(filteredAppointments);
+          const usersRef = collection(db, "users");
+          const usersSnap = await getDocs(usersRef);
+          const usersData = usersSnap.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          // @ts-ignore
+          setUsers(usersData);
         } else {
           setError(
             "User not authenticated. Please log in to view appointments."
@@ -94,30 +103,6 @@ const AppointmentsPage = () => {
 
   // @ts-ignore
   const renderDetails = (appointment) => {
-    const parishionerSection = (
-      <div className="mb-6">
-        <h3 className="text-xl font-bold">Appointment Setter</h3>
-        <Separator className="my-2" />
-        <div>
-          {appointment.userId && (
-            <p>
-              <strong>Name:</strong> {/*  @ts-ignore */}
-              {users.find((user) => user.id === appointment.userId)
-                ? `${
-                    // @ts-ignore
-                    users.find((user) => user.id === appointment.userId)
-                      .firstName
-                  } ${
-                    // @ts-ignore
-                    users.find((user) => user.id === appointment.userId)
-                      .lastName
-                  }`
-                : "Priest not found"}
-            </p>
-          )}
-        </div>
-      </div>
-    );
     const ministersSection = (
       <div className="mt-6">
         <h3 className="text-xl font-bold">Ministers</h3>
@@ -187,7 +172,6 @@ const AppointmentsPage = () => {
         const baptismalDetails = appointment?.baptismal.child;
         return (
           <div>
-            {parishionerSection}
             {baptismalDetails?.dateOfBirth && (
               <p className="w-max">
                 <strong>Child Date of Birth:</strong>{" "}
@@ -231,7 +215,6 @@ const AppointmentsPage = () => {
         const weddingDetails = appointment?.wedding;
         return (
           <div className="flex flex-col">
-            {parishionerSection}
             <div className="flex gap-x-10">
               <div>
                 <h3 className="text-lg font-bold">Bride Details</h3>
@@ -345,7 +328,6 @@ const AppointmentsPage = () => {
         const confirmationDetails = appointment?.confirmation.confirmant;
         return (
           <div>
-            {parishionerSection}
             {confirmationDetails && (
               <>
                 <h3 className="text-xl font-bold">Event Details</h3>
@@ -383,18 +365,21 @@ const AppointmentsPage = () => {
         const burialDetails = appointment?.burial.deceased;
         return (
           <div className="flex flex-col">
-            {parishionerSection}
             <div>
               {burialDetails?.dateOfBirth && (
                 <p className="w-max">
                   <strong>Date of Birth:</strong>{" "}
-                  {new Date(burialDetails.dateOfBirth).toLocaleString()}
+                  {formatDate(
+                    new Date(burialDetails.dateOfBirth).toLocaleString()
+                  )}
                 </p>
               )}
               {burialDetails?.dateOfDeath && (
                 <p className="w-max">
                   <strong>Date of Death:</strong>{" "}
-                  {new Date(burialDetails.dateOfDeath).toLocaleString()}
+                  {formatDate(
+                    new Date(burialDetails.dateOfDeath).toLocaleString()
+                  )}
                 </p>
               )}
               {burialDetails?.name && (
@@ -421,7 +406,6 @@ const AppointmentsPage = () => {
         const houseBlessingDetails = appointment?.houseBlessing.appointee;
         return (
           <div className="flex flex-col">
-            {parishionerSection}
             <div>
               {houseBlessingDetails && (
                 <div>

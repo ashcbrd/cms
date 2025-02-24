@@ -25,6 +25,7 @@ const ManageAppointmentsPage = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
+  const [users, setUsers] = useState([]);
 
   const { toast } = useToast();
   // const twilioClient = twilio(
@@ -54,6 +55,14 @@ const ManageAppointmentsPage = () => {
         ...doc.data(),
       }));
       setAppointments(appointmentsData);
+      const usersRef = collection(db, "users");
+      const usersSnap = await getDocs(usersRef);
+      const usersData = usersSnap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      // @ts-ignore
+      setUsers(usersData);
     } catch (err) {
       console.error("Error fetching appointments: ", err);
     } finally {
@@ -108,30 +117,6 @@ const ManageAppointmentsPage = () => {
 
   //@ts-ignore
   const renderDetails = (appointment) => {
-    const parishionerSection = (
-      <div className="mb-6">
-        <h3 className="text-xl font-bold">Appointment Setter</h3>
-        <Separator className="my-2" />
-        <div>
-          {appointment.userId && (
-            <p>
-              <strong>Name:</strong> {/*  @ts-ignore */}
-              {users.find((user) => user.id === appointment.userId)
-                ? `${
-                    // @ts-ignore
-                    users.find((user) => user.id === appointment.userId)
-                      .firstName
-                  } ${
-                    // @ts-ignore
-                    users.find((user) => user.id === appointment.userId)
-                      .lastName
-                  }`
-                : "Priest not found"}
-            </p>
-          )}
-        </div>
-      </div>
-    );
     const ministersSection = (
       <div className="mt-6">
         <h3 className="text-xl font-bold">Ministers</h3>
@@ -139,7 +124,8 @@ const ManageAppointmentsPage = () => {
         <div className="flex flex-col">
           {appointment.priestId && (
             <p>
-              <strong>Priest:</strong> {/*  @ts-ignore */}
+              <strong>Priest:</strong>
+              {/* @ts-ignore */}
               {users.find((user) => user.id === appointment.priestId)
                 ? `${
                     // @ts-ignore
@@ -201,7 +187,28 @@ const ManageAppointmentsPage = () => {
         const baptismalDetails = appointment?.baptismal.child;
         return (
           <div>
-            {parishionerSection}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold">Appointment Setter</h3>
+              <Separator className="my-2" />
+              <div>
+                {appointment.userId && (
+                  <p>
+                    <strong>Name:</strong> {/*  @ts-ignore */}
+                    {users.find((user) => user.id === appointment.userId)
+                      ? `${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .firstName
+                        } ${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .lastName
+                        }`
+                      : "Priest not found"}
+                  </p>
+                )}
+              </div>
+            </div>
             {baptismalDetails?.dateOfBirth && (
               <p className="w-max">
                 <strong>Child Date of Birth:</strong>{" "}
@@ -245,7 +252,28 @@ const ManageAppointmentsPage = () => {
         const weddingDetails = appointment?.wedding;
         return (
           <div className="flex flex-col">
-            {parishionerSection}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold">Appointment Setter</h3>
+              <Separator className="my-2" />
+              <div>
+                {appointment.userId && (
+                  <p>
+                    <strong>Name:</strong> {/*  @ts-ignore */}
+                    {users.find((user) => user.id === appointment.userId)
+                      ? `${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .firstName
+                        } ${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .lastName
+                        }`
+                      : "Priest not found"}
+                  </p>
+                )}
+              </div>
+            </div>
             <div className="flex gap-x-10">
               <div>
                 <h3 className="text-lg font-bold">Bride Details</h3>
@@ -359,7 +387,28 @@ const ManageAppointmentsPage = () => {
         const confirmationDetails = appointment?.confirmation.confirmant;
         return (
           <div>
-            {parishionerSection}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold">Appointment Setter</h3>
+              <Separator className="my-2" />
+              <div>
+                {appointment.userId && (
+                  <p>
+                    <strong>Name:</strong> {/*  @ts-ignore */}
+                    {users.find((user) => user.id === appointment.userId)
+                      ? `${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .firstName
+                        } ${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .lastName
+                        }`
+                      : "Priest not found"}
+                  </p>
+                )}
+              </div>
+            </div>
             {confirmationDetails && (
               <>
                 <h3 className="text-xl font-bold">Event Details</h3>
@@ -397,7 +446,28 @@ const ManageAppointmentsPage = () => {
         const burialDetails = appointment?.burial.deceased;
         return (
           <div className="flex flex-col">
-            {parishionerSection}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold">Appointment Setter</h3>
+              <Separator className="my-2" />
+              <div>
+                {appointment.userId && (
+                  <p>
+                    <strong>Name:</strong> {/*  @ts-ignore */}
+                    {users.find((user) => user.id === appointment.userId)
+                      ? `${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .firstName
+                        } ${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .lastName
+                        }`
+                      : "Priest not found"}
+                  </p>
+                )}
+              </div>
+            </div>
             <div>
               {burialDetails?.dateOfBirth && (
                 <p className="w-max">
@@ -435,7 +505,28 @@ const ManageAppointmentsPage = () => {
         const houseBlessingDetails = appointment?.houseBlessing.appointee;
         return (
           <div className="flex flex-col">
-            {parishionerSection}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold">Appointment Setter</h3>
+              <Separator className="my-2" />
+              <div>
+                {appointment.userId && (
+                  <p>
+                    <strong>Name:</strong> {/*  @ts-ignore */}
+                    {users.find((user) => user.id === appointment.userId)
+                      ? `${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .firstName
+                        } ${
+                          // @ts-ignore
+                          users.find((user) => user.id === appointment.userId)
+                            .lastName
+                        }`
+                      : "Priest not found"}
+                  </p>
+                )}
+              </div>
+            </div>
             <div>
               {houseBlessingDetails && (
                 <div>
@@ -478,7 +569,7 @@ const ManageAppointmentsPage = () => {
           <div className="bg-white p-4 border border-gray-300/50 rounded-lg shadow-md shadow-gray-300/20 mt-4">
             <h2 className="text-xl font-semibold">Pending Appointments </h2>
             <p className="text-gray-600 font-normal text-xs">
-              Click an appointment to see details.
+              g Click an appointment to see details.
             </p>
             {groupedAppointments["Pending"].length > 0 ? (
               <ul className="max-h-52 overflow-y-auto">
