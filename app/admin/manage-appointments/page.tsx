@@ -19,19 +19,22 @@ import { formatDate } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-// import twilio from "twilio";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const ManageAppointmentsPage = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
   const [users, setUsers] = useState([]);
+  const [expandedStatuses, setExpandedStatuses] = useState<
+    Record<string, boolean>
+  >({
+    Accepted: false,
+    Denied: false,
+    Confirmed: false,
+  });
 
   const { toast } = useToast();
-  // const twilioClient = twilio(
-  //   "AC8cca343a0750d06b7990a6457fee3a92",
-  //   "793f818ca26736fe38ea059c90f61cc6"
-  // );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -82,16 +85,6 @@ const ManageAppointmentsPage = () => {
           duration: 5000,
           title: "Appointment accepted.",
         });
-        // const appointment = appointments.find((app) => app.id === id);
-        // await twilioClient.messages.create({
-        //   body: `Your appointment for ${formatAppointmentType(
-        //     appointment.appointmentType
-        //   )} on ${formatDate(
-        //     new Date(appointment.date).toLocaleDateString()
-        //   )} has been accepted.`,
-        //   from: "YOUR_TWILIO_PHONE_NUMBER",
-        //   to: "+639981809615",
-        // });
       } else if (status === "Denied") {
         toast({
           title: "Appointment denied.",
@@ -114,6 +107,13 @@ const ManageAppointmentsPage = () => {
     acc[status] = appointments.filter((app) => app.status === status);
     return acc;
   }, {} as Record<string, unknown[]>);
+
+  const toggleExpand = (status: string) => {
+    setExpandedStatuses((prev) => ({
+      ...prev,
+      [status]: !prev[status],
+    }));
+  };
 
   //@ts-ignore
   const renderDetails = (appointment) => {
@@ -569,7 +569,7 @@ const ManageAppointmentsPage = () => {
           <div className="bg-white p-4 border border-gray-300/50 rounded-lg shadow-md shadow-gray-300/20 mt-4">
             <h2 className="text-xl font-semibold">Pending Appointments </h2>
             <p className="text-gray-600 font-normal text-xs">
-              g Click an appointment to see details.
+              Click an appointment to see details.
             </p>
             {groupedAppointments["Pending"].length > 0 ? (
               <ul className="max-h-52 overflow-y-auto">
@@ -660,61 +660,69 @@ const ManageAppointmentsPage = () => {
           </div>
           <div className="grid grid-cols-3 gap-4">
             {statuses.slice(1).map((status) => (
-              <div
-                key={status}
-                className="bg-white p-4 border border-gray-300/50 rounded-lg shadow-md shadow-gray-300/20 mt-4"
-              >
-                <h2 className="text-xl font-semibold">{status} Appointments</h2>
-                {groupedAppointments[status].length > 0 && (
-                  <p className="text-gray-600 font-normal text-xs">
-                    Click an appointment to see details.
-                  </p>
-                )}
-                {groupedAppointments[status].length > 0 ? (
-                  <ul className="max-h-52 overflow-y-auto">
-                    {groupedAppointments[status].map((app) => (
-                      <li
-                        //@ts-ignore
-                        key={app.id}
-                        className="border-b border-gray-200 py-2"
-                      >
-                        <Dialog>
-                          <DialogTrigger>
-                            <h2 className="hover:underline transition-all">
-                              <span className="font-bold">
-                                {/*  @ts-ignore */}
-                                {formatAppointmentType(app.appointmentType)}
-                              </span>{" "}
-                              -{" "}
-                              {formatDate(
-                                //@ts-ignore
-                                new Date(app.date).toLocaleDateString()
-                              )}
-                            </h2>
-                          </DialogTrigger>
-                          <DialogContent className="!min-w-max p-10">
-                            <DialogHeader>
-                              <DialogTitle className="text-2xl">
-                                {/*  @ts-ignore */}
-                                {formatAppointmentType(app.appointmentType)
-                                  .charAt(0)
-                                  .toUpperCase() +
-                                  //@ts-ignore
-                                  formatAppointmentType(
+              <div key={status} className="mt-4">
+                <div
+                  className="flex items-center justify-between cursor-pointer bg-gray-50 py-2 px-4 rounded-lg shadow shadow-gray-200"
+                  onClick={() => toggleExpand(status)}
+                >
+                  <h2 className="text-xl font-semibold">
+                    {status} Appointments
+                  </h2>
+                  {expandedStatuses[status] ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                </div>
+                {expandedStatuses[status] && (
+                  <>
+                    {groupedAppointments[status].length > 0 ? (
+                      <ul className="max-h-52 overflow-y-auto px-4">
+                        {groupedAppointments[status].map((app) => (
+                          <li
+                            //@ts-ignore
+                            key={app.id}
+                            className="border-b border-gray-200 py-2"
+                          >
+                            <Dialog>
+                              <DialogTrigger>
+                                <h2 className="hover:underline transition-all">
+                                  <span className="font-bold">
+                                    {/*  @ts-ignore */}
+                                    {formatAppointmentType(app.appointmentType)}
+                                  </span>{" "}
+                                  -{" "}
+                                  {formatDate(
                                     //@ts-ignore
-                                    app.appointmentType
-                                  ).slice(1)}{" "}
-                                Appointment
-                              </DialogTitle>
-                            </DialogHeader>
-                            {renderDetails(app)}
-                          </DialogContent>
-                        </Dialog>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No appointments for this status.</p>
+                                    new Date(app.date).toLocaleDateString()
+                                  )}
+                                </h2>
+                              </DialogTrigger>
+                              <DialogContent className="!min-w-max p-10">
+                                <DialogHeader>
+                                  <DialogTitle className="text-2xl">
+                                    {/*  @ts-ignore */}
+                                    {formatAppointmentType(app.appointmentType)
+                                      .charAt(0)
+                                      .toUpperCase() +
+                                      //@ts-ignore
+                                      formatAppointmentType(
+                                        //@ts-ignore
+                                        app.appointmentType
+                                      ).slice(1)}{" "}
+                                    Appointment
+                                  </DialogTitle>
+                                </DialogHeader>
+                                {renderDetails(app)}
+                              </DialogContent>
+                            </Dialog>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No appointments for this status.</p>
+                    )}
+                  </>
                 )}
               </div>
             ))}

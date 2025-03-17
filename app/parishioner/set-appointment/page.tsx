@@ -36,6 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import "./calendar.css";
 
 const SetAppoinent = () => {
   const [appointmentType, setAppointmentType] = useState("");
@@ -1144,7 +1145,11 @@ const SetAppoinent = () => {
                 selected={date}
                 // @ts-ignore
                 onSelect={setDate}
+                disabled={{ from: new Date(0), to: new Date() }}
                 initialFocus
+                modifiersClassNames={{
+                  disabled: "rdp-day_disabled",
+                }}
               />
             </PopoverContent>
           </Popover>

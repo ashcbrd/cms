@@ -160,7 +160,11 @@ const ManageAccounts: React.FC = () => {
       !passwordValidation.uppercase ||
       !passwordValidation.lowercase
     ) {
-      console.log("Please fill in all fields correctly.");
+      toast({
+        title: "Error",
+        description: "Please fill in all fields correctly.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -217,6 +221,9 @@ const ManageAccounts: React.FC = () => {
     fetchUsers();
     setIsEditDialogOpen(false);
     setEditUser(null);
+    toast({
+      title: "User updated successfully.",
+    });
   };
 
   const handleDeleteUser = async () => {
@@ -289,6 +296,7 @@ const ManageAccounts: React.FC = () => {
               <DialogTitle>{editUser ? "Edit User" : "Add User"}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="w-full flex flex-col">
+              <label className="block mb-2">First Name</label>
               <Input
                 type="text"
                 id="firstName"
@@ -299,6 +307,7 @@ const ManageAccounts: React.FC = () => {
                   setNewUser((prev) => ({ ...prev, firstName: e.target.value }))
                 }
               />
+              <label className="block mb-2">Last Name</label>
               <Input
                 type="text"
                 id="lastName"
@@ -309,6 +318,7 @@ const ManageAccounts: React.FC = () => {
                   setNewUser((prev) => ({ ...prev, lastName: e.target.value }))
                 }
               />
+              <label className="block mb-2">Email</label>
               <Input
                 type="email"
                 id="email"
@@ -319,6 +329,7 @@ const ManageAccounts: React.FC = () => {
                   setNewUser((prev) => ({ ...prev, email: e.target.value }))
                 }
               />
+              <label className="block mb-2">Address</label>
               <Input
                 type="text"
                 id="address"
@@ -329,6 +340,7 @@ const ManageAccounts: React.FC = () => {
                   setNewUser((prev) => ({ ...prev, address: e.target.value }))
                 }
               />
+              <label className="block mb-2">Contact Number</label>
               <Input
                 type="text"
                 id="contactNumber"
@@ -342,6 +354,7 @@ const ManageAccounts: React.FC = () => {
                   }))
                 }
               />
+              <label className="block mb-2">Password</label>
               <Input
                 type="password"
                 id="password"

@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 
 export default function ManageEvents() {
   const [appointments, setAppointments] = useState([]);
@@ -50,6 +51,7 @@ export default function ManageEvents() {
 
     fetchAppointmentsAndUsers();
   }, []);
+
   // @ts-ignore
   const handleEditParticipants = (appointment) => {
     setSelectedAppointment(appointment);
@@ -59,6 +61,7 @@ export default function ManageEvents() {
       altarServerPresident: appointment.altarServerPresidentId || null,
     });
   };
+
   // @ts-ignore
   const handleShowDetails = (appointment) => {
     setDetailsAppointment(appointment);
@@ -77,6 +80,25 @@ export default function ManageEvents() {
         priestId: tempParticipants.priest || null,
       };
       await updateDoc(appointmentRef, updates);
+
+      // @ts-ignore
+      const updateParticipantAvailability = async (userId) => {
+        if (userId) {
+          const userRef = doc(db, "users", userId);
+          await updateDoc(userRef, { available: false });
+        }
+      };
+
+      // @ts-ignore
+      await updateParticipantAvailability(tempParticipants.priest);
+      // @ts-ignore
+      await updateParticipantAvailability(tempParticipants.altarServer);
+
+      await updateParticipantAvailability(
+        // @ts-ignore
+        tempParticipants.altarServerPresident
+      );
+
       fetchAppointments();
       setSelectedAppointment(null);
     }
@@ -95,6 +117,7 @@ export default function ManageEvents() {
     // @ts-ignore
     setAppointments(appointmentsData);
   };
+
   // @ts-ignore
   const handleConfirmAppointment = (appointment) => {
     setConfirmationAppointment(appointment);
@@ -110,6 +133,27 @@ export default function ManageEvents() {
           confirmationAppointment.id
         );
         await updateDoc(appointmentRef, { status: "Confirmed" });
+
+        // @ts-ignore
+        const updateParticipantAvailability = async (userId) => {
+          if (userId) {
+            const userRef = doc(db, "users", userId);
+            await updateDoc(userRef, { available: true });
+          }
+        };
+
+        // @ts-ignore
+        await updateParticipantAvailability(confirmationAppointment.priestId);
+
+        await updateParticipantAvailability(
+          // @ts-ignore
+          confirmationAppointment.altarServerId
+        );
+        await updateParticipantAvailability(
+          // @ts-ignore
+          confirmationAppointment.altarServerPresidentId
+        );
+
         fetchAppointments();
         setConfirmationAppointment(null);
       } catch (error) {
@@ -117,10 +161,12 @@ export default function ManageEvents() {
       }
     }
   };
+
   // @ts-ignore
   const handleSelectParticipant = (role, userId) => {
     setTempParticipants((prev) => ({ ...prev, [role]: userId }));
   };
+
   // @ts-ignore
   const getParticipantName = (role) => {
     // @ts-ignore
@@ -132,6 +178,112 @@ export default function ManageEvents() {
         `${participant.firstName} ${participant.lastName}`
       : `Select ${role.charAt(0).toUpperCase() + role.slice(1)}`;
   };
+
+  // @ts-ignore
+  const getCertificateLink = (appointment) => {
+    const baseUrl = "/admin";
+    switch (appointment.appointmentType) {
+      case "baptismal":
+        return `${baseUrl}/baptism-certificate?babyName=${
+          appointment.baptismal.child.name.firstName +
+          " " +
+          appointment.baptismal.child.name.lastName
+        }&baptismDate=${appointment.date}&priestName=${
+          appointment.priestId
+            ? users.find(
+                (user) =>
+                  // @ts-ignore
+                  user.id === appointment.priestId
+                // @ts-ignore
+              )?.firstName +
+              " " +
+              // @ts-ignore
+              users.find((user) => user.id === appointment.priestId)?.lastName
+            : "Unknown Priest"
+        }`;
+      case "wedding":
+        return `${baseUrl}/marriage-certificate?groomFirstName=${
+          appointment.wedding.groom.name.firstName
+        }&groomLastName=${
+          appointment.wedding.groom.name.lastName
+        }&brideFirstName=${
+          appointment.wedding.bride.name.firstName
+        }&brideLastName=${
+          appointment.wedding.bride.name.lastName
+        }&weddingDate=${appointment.date}&priestName=${
+          appointment.priestId
+            ? users.find(
+                (user) =>
+                  // @ts-ignore
+                  user.id === appointment.priestId
+                // @ts-ignore
+              )?.firstName +
+              " " +
+              // @ts-ignore
+              users.find((user) => user.id === appointment.priestId)?.lastName
+            : "Unknown Priest"
+        }`;
+      case "confirmation":
+        return `${baseUrl}/confirmation-certificate?parishionerName=${
+          appointment.confirmation.confirmant.name.firstName +
+          " " +
+          appointment.confirmation.confirmant.name.lastName
+        }&confirmationDate=${appointment.date}&priestName=${
+          appointment.priestId
+            ? // @ts-ignore
+              users.find(
+                (user) =>
+                  // @ts-ignore
+                  user.id === appointment.priestId
+                // @ts-ignore
+              )?.firstName +
+              " " +
+              // @ts-ignore
+              users.find((user) => user.id === appointment.priestId)?.lastName
+            : "Unknown Priest"
+        }`;
+      case "burial":
+        return `${baseUrl}/death-certificate?deceasedName=${
+          appointment.burial.deceased.name.firstName +
+          " " +
+          appointment.burial.deceased.name.lastName
+        }&dateOfDeath=${appointment.date}&priestName=${
+          appointment.priestId
+            ? users.find(
+                (user) =>
+                  // @ts-ignore
+                  user.id === appointment.priestId
+                // @ts-ignore
+              )?.firstName +
+              " " +
+              // @ts-ignore
+              users.find((user) => user.id === appointment.priestId)?.lastName
+            : "Unknown Priest"
+        }`;
+      case "houseBlessing":
+        return `${baseUrl}/house-blessing-certificate?parishionerName=${
+          appointment.houseBlessing.appointee.name.firstName +
+          " " +
+          appointment.houseBlessing.appointee.name.lastName
+        }&houseBlessingDate=${appointment.date}&priestName=${
+          appointment.priestId
+            ? // @ts-ignore
+              users.find(
+                (user) =>
+                  // @ts-ignore
+                  user.id === appointment.priestId
+                // @ts-ignore
+              )?.firstName +
+              " " +
+              // @ts-ignore
+              users.find((user) => user.id === appointment.priestId)?.lastName
+            : "Unknown Priest"
+        }`;
+      default:
+        return "#";
+    }
+  };
+
   // @ts-ignore
   const renderDetails = (appointment) => {
     const parishionerSection = (
@@ -141,7 +293,7 @@ export default function ManageEvents() {
         <div>
           {appointment.userId && (
             <p>
-              <strong>Name:</strong> {/*  @ts-ignore */}
+              <strong>Name:</strong> {/* @ts-ignore */}
               {users.find((user) => user.id === appointment.userId)
                 ? `${
                     // @ts-ignore
@@ -152,12 +304,13 @@ export default function ManageEvents() {
                     users.find((user) => user.id === appointment.userId)
                       .lastName
                   }`
-                : "Priest not found"}
+                : "User not found"}
             </p>
           )}
         </div>
       </div>
     );
+
     const ministersSection = (
       <div className="mt-6">
         <h3 className="text-xl font-bold">Ministers</h3>
@@ -165,7 +318,7 @@ export default function ManageEvents() {
         <div className="flex flex-col">
           {appointment.priestId && (
             <p>
-              <strong>Priest:</strong> {/*  @ts-ignore */}
+              <strong>Priest:</strong> {/* @ts-ignore */}
               {users.find((user) => user.id === appointment.priestId)
                 ? `${
                     // @ts-ignore
@@ -264,6 +417,11 @@ export default function ManageEvents() {
               appointment.altarServerId ||
               appointment.altarServerPresidentId) &&
               ministersSection}
+            <div className="mt-4">
+              <Link target="_blank" href={getCertificateLink(appointment)}>
+                <Button variant="outline">View Certificate</Button>
+              </Link>
+            </div>
           </div>
         );
 
@@ -378,6 +536,11 @@ export default function ManageEvents() {
               appointment.altarServerId ||
               appointment.altarServerPresidentId) &&
               ministersSection}
+            <div className="mt-4">
+              <Link target="_blank" href={getCertificateLink(appointment)}>
+                <Button variant="outline">View Certificate</Button>
+              </Link>
+            </div>
           </div>
         );
 
@@ -414,6 +577,11 @@ export default function ManageEvents() {
                   appointment.altarServerId ||
                   appointment.altarServerPresidentId) &&
                   ministersSection}
+                <div className="mt-4">
+                  <Link target="_blank" href={getCertificateLink(appointment)}>
+                    <Button variant="outline">View Certificate</Button>
+                  </Link>
+                </div>
               </>
             )}
           </div>
@@ -453,6 +621,11 @@ export default function ManageEvents() {
                 appointment.altarServerId ||
                 appointment.altarServerPresidentId) &&
                 ministersSection}
+              <div className="mt-4">
+                <Link target="_blank" href={getCertificateLink(appointment)}>
+                  <Button variant="outline">View Certificate</Button>
+                </Link>
+              </div>
             </div>
           </div>
         );
@@ -485,6 +658,11 @@ export default function ManageEvents() {
                 appointment.altarServerId ||
                 appointment.altarServerPresidentId) &&
                 ministersSection}
+              <div className="mt-4">
+                <Link target="_blank" href={getCertificateLink(appointment)}>
+                  <Button variant="outline">View Certificate</Button>
+                </Link>
+              </div>
             </div>
           </div>
         );
@@ -569,12 +747,20 @@ export default function ManageEvents() {
                           onClick={() => handleEditParticipants(appointment)}
                           className="ml-2"
                         >
-                          {getParticipantName("priest") !== `Select Priest` ? (
+                          {getParticipantName("priest") !== `Select Priest` ||
+                          getParticipantName("altarServer") !==
+                            `Select AltarServer` ||
+                          getParticipantName("altarServerPresident") !==
+                            `Select AltarServerPresident` ? (
                             <UserPen />
                           ) : (
                             <UserPen />
                           )}{" "}
-                          {getParticipantName("priest") !== `Select Priest`
+                          {getParticipantName("priest") !== `Select Priest` ||
+                          getParticipantName("altarServer") !==
+                            `Select AltarServer` ||
+                          getParticipantName("altarServerPresident") !==
+                            `Select AltarServerPresident`
                             ? "Edit Participants"
                             : "Add Participants"}
                         </Button>
@@ -616,8 +802,13 @@ export default function ManageEvents() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           {users
-                            // @ts-ignore
-                            .filter((user) => user.role === "priest")
+                            .filter(
+                              (user) =>
+                                // @ts-ignore
+                                user.role === "priest" &&
+                                // @ts-ignore
+                                user.available === true
+                            )
                             .map((user) => (
                               <DropdownMenuItem
                                 // @ts-ignore
@@ -641,8 +832,13 @@ export default function ManageEvents() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           {users
-                            // @ts-ignore
-                            .filter((user) => user.role === "altarServer")
+                            .filter(
+                              (user) =>
+                                // @ts-ignore
+                                user.role === "altarServer" &&
+                                // @ts-ignore
+                                user.available === true
+                            )
                             .map((user) => (
                               <DropdownMenuItem
                                 // @ts-ignore
@@ -671,8 +867,11 @@ export default function ManageEvents() {
                           {users
                             // @ts-ignore
                             .filter(
-                              // @ts-ignore
-                              (user) => user.role === "altarServerPresident"
+                              (user) =>
+                                // @ts-ignore
+                                user.role === "altarServerPresident" &&
+                                // @ts-ignore
+                                user.available === true
                             )
                             .map((user) => (
                               <DropdownMenuItem
@@ -767,6 +966,12 @@ export default function ManageEvents() {
                       >
                         <EyeIcon /> View Details
                       </Button>
+                      <Link
+                        target="_blank"
+                        href={getCertificateLink(appointment)}
+                      >
+                        <Button variant="outline">View Certificate</Button>
+                      </Link>
                     </div>
                   </div>
                   <Dialog

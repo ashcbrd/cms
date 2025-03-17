@@ -1,0 +1,6 @@
+.rdp-day_disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  color: #999;
+  cursor: not-allowed;
+}

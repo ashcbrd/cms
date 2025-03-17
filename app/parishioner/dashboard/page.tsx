@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { db } from "@/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { auth } from "@/firebase";
-import { onAuthStateChanged } from "firebase/auth"; // Add this
+import { onAuthStateChanged } from "firebase/auth";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./custom-calendar.css";
