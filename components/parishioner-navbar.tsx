@@ -30,6 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Link from "next/link";
 
 const ParishionerNavbar = () => {
   const [userDetails, setUserDetails] = useState<{
@@ -105,8 +106,11 @@ const ParishionerNavbar = () => {
                 <DropdownMenuContent>
                   <DropdownMenuLabel>Profile</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Edit Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/parishioner/account-settings">
+                      Account Settings
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="font-semibold cursor-pointer"

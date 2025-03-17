@@ -139,6 +139,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
         toast({ title: "Registered successfully" });
         router.push("/parishioner/dashboard");
       } catch (err: any) {
+        console.error("Error during registration:", err);
         if (err.code === "auth/email-already-in-use") {
           setError("The email address is already in use by another account.");
         } else if (err.code === "auth/invalid-email") {
@@ -153,7 +154,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin }) => {
       }
     }
 
-    // Reset fields
     setEmail("");
     setPassword("");
     setFirstName("");

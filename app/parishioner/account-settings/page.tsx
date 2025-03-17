@@ -13,7 +13,8 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { User as FirebaseUser } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UserPen } from "lucide-react";
+import { ArrowLeftFromLine, UserPen } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface UserData {
   firstName: string;
@@ -33,6 +34,8 @@ export default function AccountSettingsPage() {
     contactNumber: "",
     address: "",
   });
+
+  const router = useRouter();
 
   const user: FirebaseUser | null = auth.currentUser;
 
@@ -77,7 +80,14 @@ export default function AccountSettingsPage() {
   if (!userData) return <p>Loading...</p>;
 
   return (
-    <div className="p-16 flex items-center justify-center w-full h-full">
+    <div className="p-16 flex flex-col items-center justify-center mx-auto h-full w-[800px]">
+      <Button
+        onClick={() => router.back()}
+        variant="ghost"
+        className=" mr-auto -ml-16 mb-6"
+      >
+        <ArrowLeftFromLine /> Back
+      </Button>
       <div className="space-y-4 w-[800px] p-10 rounded-xl shadow-xl shadow-gray-300/20 border border-gray-500/20">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Account Settings</h2>
