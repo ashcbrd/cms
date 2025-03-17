@@ -73,6 +73,27 @@ const ManageAppointmentsPage = () => {
     }
   };
 
+  const sendSms = async (to: string, body: string) => {
+    try {
+      const response = await fetch("/api/send-sms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ to, body }),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log("SMS sent successfully:", result);
+      } else {
+        console.error("Failed to send SMS:", result);
+      }
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+    }
+  };
+
   const updateAppointmentStatus = async (id: string, status: string) => {
     const appointmentRef = doc(db, "appointments", id);
 
@@ -80,16 +101,35 @@ const ManageAppointmentsPage = () => {
       await updateDoc(appointmentRef, {
         status: status,
       });
-      if (status === "Accepted") {
-        toast({
-          duration: 5000,
-          title: "Appointment accepted.",
-        });
-      } else if (status === "Denied") {
-        toast({
-          title: "Appointment denied.",
-        });
+
+      const appointment = appointments.find((app) => app.id === id);
+      // @ts-ignore
+      const user = users.find((user) => user.id === appointment?.userId);
+
+      // @ts-ignore
+      if (user && user.contactNumber) {
+        const message =
+          status === "Accepted"
+            ? `Your appointment for ${formatAppointmentType(
+                appointment!.appointmentType
+              )} on ${formatDate(
+                new Date(appointment!.date).toLocaleDateString()
+              )} has been accepted.`
+            : `Your appointment for ${formatAppointmentType(
+                appointment!.appointmentType
+              )} on ${formatDate(
+                new Date(appointment!.date).toLocaleDateString()
+              )} has been denied.`;
+
+        // @ts-ignore
+        await sendSms(user.contactNumber, message);
       }
+
+      toast({
+        duration: 5000,
+        title: `Appointment ${status.toLowerCase()}.`,
+      });
+
       fetchAppointments();
     } catch (err) {
       console.error("Error updating appointment status: ", err);
