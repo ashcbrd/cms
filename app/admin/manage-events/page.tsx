@@ -243,7 +243,7 @@ export default function ManageEvents() {
     const participant = users.find((user) => user.id === participantId);
     return participant
       ? // @ts-ignore
-        `${participant.firstName} ${participant.lastName}`
+        `${participant?.firstName} ${participant?.lastName}`
       : `Select ${role.charAt(0).toUpperCase() + role.slice(1)}`;
   };
 
