@@ -67,26 +67,74 @@ export default function ManageEvents() {
     setDetailsAppointment(appointment);
   };
 
-  const sendSms = async (to: string, body: string) => {
-    try {
-      const response = await fetch("/api/send-sms", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ to, body }),
-      });
+  useEffect(() => {
+    const sendSms = async (to: string, body: string) => {
+      try {
+        const response = await fetch("/api/send-sms", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ to, body }),
+        });
 
-      const result = await response.json();
-      if (response.ok) {
-        console.log("SMS sent successfully:", result);
-      } else {
-        console.error("Failed to send SMS:", result);
+        const result = await response.json();
+        if (response.ok) {
+          console.log("SMS sent successfully:", result);
+        } else {
+          console.error("Failed to send SMS:", result);
+        }
+      } catch (error) {
+        console.error("Error sending SMS:", error);
       }
-    } catch (error) {
-      console.error("Error sending SMS:", error);
+    };
+
+    if (selectedAppointment) {
+      const sendSmsToParticipants = async () => {
+        const message =
+          "Good day! You have been assigned to an event. Please open the app to view the details.";
+
+        // @ts-ignore
+        if (tempParticipants.priest) {
+          const priest = users.find(
+            // @ts-ignore
+            (user) => user.id === tempParticipants.priest
+          );
+          // @ts-ignore
+          if (priest && priest.contactNumber) {
+            // @ts-ignore
+            await sendSms(priest.contactNumber, message);
+          }
+        }
+        // @ts-ignore
+        if (tempParticipants.altarServer) {
+          const altarServer = users.find(
+            // @ts-ignore
+            (user) => user.id === tempParticipants.altarServer
+          );
+          // @ts-ignore
+          if (altarServer && altarServer.contactNumber) {
+            // @ts-ignore
+            await sendSms(altarServer.contactNumber, message);
+          }
+        }
+        // @ts-ignore
+        if (tempParticipants.altarServerPresident) {
+          const altarServerPresident = users.find(
+            // @ts-ignore
+            (user) => user.id === tempParticipants.altarServerPresident
+          );
+          // @ts-ignore
+          if (altarServerPresident && altarServerPresident.contactNumber) {
+            // @ts-ignore
+            await sendSms(altarServerPresident.contactNumber, message);
+          }
+        }
+      };
+
+      sendSmsToParticipants();
     }
-  };
+  }, [selectedAppointment, tempParticipants, users]);
 
   const handleSaveParticipants = async () => {
     if (selectedAppointment) {
@@ -118,53 +166,6 @@ export default function ManageEvents() {
         // @ts-ignore
         tempParticipants.altarServerPresident
       );
-
-      // Send SMS to assigned participants
-      const sendSmsToParticipants = async () => {
-        const message =
-          "Good day! You have been assigned to an event. Please open the app to view the details.";
-
-        // @ts-ignore
-        if (tempParticipants.priest) {
-          const priest = users.find(
-            // @ts-ignore
-            (user) => user.id === tempParticipants.priest
-          );
-          // @ts-ignore
-          if (priest && priest.contactNumber) {
-            // @ts-ignore
-            await sendSms(priest.contactNumber, message);
-          }
-        }
-
-        // @ts-ignore
-        if (tempParticipants.altarServer) {
-          const altarServer = users.find(
-            // @ts-ignore
-            (user) => user.id === tempParticipants.altarServer
-          );
-          // @ts-ignore
-          if (altarServer && altarServer.contactNumber) {
-            // @ts-ignore
-            await sendSms(altarServer.contactNumber, message);
-          }
-        }
-
-        // @ts-ignore
-        if (tempParticipants.altarServerPresident) {
-          const altarServerPresident = users.find(
-            // @ts-ignore
-            (user) => user.id === tempParticipants.altarServerPresident
-          );
-          // @ts-ignore
-          if (altarServerPresident && altarServerPresident.contactNumber) {
-            // @ts-ignore
-            await sendSms(altarServerPresident.contactNumber, message);
-          }
-        }
-      };
-
-      await sendSmsToParticipants();
 
       fetchAppointments();
       setSelectedAppointment(null);

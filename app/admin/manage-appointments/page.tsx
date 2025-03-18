@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const ManageAppointmentsPage = () => {
+export default function ManageAppointmentsPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
@@ -73,27 +73,6 @@ const ManageAppointmentsPage = () => {
     }
   };
 
-  const sendSms = async (to: string, body: string) => {
-    try {
-      const response = await fetch("/api/send-sms", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ to, body }),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        console.log("SMS sent successfully:", result);
-      } else {
-        console.error("Failed to send SMS:", result);
-      }
-    } catch (error) {
-      console.error("Error sending SMS:", error);
-    }
-  };
-
   const updateAppointmentStatus = async (id: string, status: string) => {
     const appointmentRef = doc(db, "appointments", id);
 
@@ -120,6 +99,28 @@ const ManageAppointmentsPage = () => {
               )} on ${formatDate(
                 new Date(appointment!.date).toLocaleDateString()
               )} has been denied.`;
+
+        // Send SMS using the sendSms function inside useEffect
+        const sendSms = async (to: string, body: string) => {
+          try {
+            const response = await fetch("/api/send-sms", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ to, body }),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+              console.log("SMS sent successfully:", result);
+            } else {
+              console.error("Failed to send SMS:", result);
+            }
+          } catch (error) {
+            console.error("Error sending SMS:", error);
+          }
+        };
 
         // @ts-ignore
         await sendSms(user.contactNumber, message);
@@ -785,6 +786,4 @@ const ManageAppointmentsPage = () => {
       )}
     </div>
   );
-};
-
-export default ManageAppointmentsPage;
+}
