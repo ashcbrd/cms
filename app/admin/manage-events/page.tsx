@@ -253,9 +253,9 @@ export default function ManageEvents() {
     switch (appointment.appointmentType) {
       case "baptismal":
         return `${baseUrl}/baptism-certificate?babyName=${
-          appointment.baptismal.child.name.firstName +
+          appointment.baptismal.child.name?.firstName +
           " " +
-          appointment.baptismal.child.name.lastName
+          appointment.baptismal.child.name?.lastName
         }&baptismDate=${appointment.date}&priestName=${
           appointment.priestId
             ? users.find(
@@ -271,13 +271,13 @@ export default function ManageEvents() {
         }`;
       case "wedding":
         return `${baseUrl}/marriage-certificate?groomFirstName=${
-          appointment.wedding.groom.name.firstName
+          appointment.wedding.groom.name?.firstName
         }&groomLastName=${
-          appointment.wedding.groom.name.lastName
+          appointment.wedding.groom.name?.lastName
         }&brideFirstName=${
-          appointment.wedding.bride.name.firstName
+          appointment.wedding.bride.name?.firstName
         }&brideLastName=${
-          appointment.wedding.bride.name.lastName
+          appointment.wedding.bride.name?.lastName
         }&weddingDate=${appointment.date}&priestName=${
           appointment.priestId
             ? users.find(
@@ -293,9 +293,9 @@ export default function ManageEvents() {
         }`;
       case "confirmation":
         return `${baseUrl}/confirmation-certificate?parishionerName=${
-          appointment.confirmation.confirmant.name.firstName +
+          appointment.confirmation.confirmant.name?.firstName +
           " " +
-          appointment.confirmation.confirmant.name.lastName
+          appointment.confirmation.confirmant.name?.lastName
         }&confirmationDate=${appointment.date}&priestName=${
           appointment.priestId
             ? // @ts-ignore
@@ -312,9 +312,9 @@ export default function ManageEvents() {
         }`;
       case "burial":
         return `${baseUrl}/death-certificate?deceasedName=${
-          appointment.burial.deceased.name.firstName +
+          appointment.burial.deceased.name?.firstName +
           " " +
-          appointment.burial.deceased.name.lastName
+          appointment.burial.deceased.name?.lastName
         }&dateOfDeath=${appointment.date}&priestName=${
           appointment.priestId
             ? users.find(
@@ -330,9 +330,9 @@ export default function ManageEvents() {
         }`;
       case "houseBlessing":
         return `${baseUrl}/house-blessing-certificate?parishionerName=${
-          appointment.houseBlessing.appointee.name.firstName +
+          appointment.houseBlessing.appointee.name?.firstName +
           " " +
-          appointment.houseBlessing.appointee.name.lastName
+          appointment.houseBlessing.appointee.name?.lastName
         }&houseBlessingDate=${appointment.date}&priestName=${
           appointment.priestId
             ? // @ts-ignore
@@ -505,7 +505,7 @@ export default function ManageEvents() {
                 <div className="mt-4">
                   <p className="w-max">
                     <strong>Name:</strong>{" "}
-                    {`${weddingDetails.bride.name.firstName} ${weddingDetails.bride.name.lastName}`}
+                    {`${weddingDetails.bride.name?.firstName} ${weddingDetails.bride.name?.lastName}`}
                   </p>
                   {weddingDetails.bride.dateOfBirth && (
                     <p className="w-max">
@@ -555,7 +555,7 @@ export default function ManageEvents() {
                 <div className="mt-4">
                   <p className="w-max">
                     <strong>Name:</strong>{" "}
-                    {`${weddingDetails.groom.name.firstName} ${weddingDetails.groom.name.lastName}`}
+                    {`${weddingDetails.groom.name?.firstName} ${weddingDetails.groom.name?.lastName}`}
                   </p>
                   {weddingDetails.groom.dateOfBirth && (
                     <p className="w-max">
@@ -624,7 +624,7 @@ export default function ManageEvents() {
                 <div>
                   <p>
                     <strong>Name:</strong>{" "}
-                    {`${confirmationDetails.name.firstName} ${confirmationDetails.name.lastName}`}
+                    {`${confirmationDetails.name?.firstName} ${confirmationDetails.name?.lastName}`}
                   </p>
                   {confirmationDetails.dateOfBirth && (
                     <p>
@@ -676,7 +676,7 @@ export default function ManageEvents() {
               {burialDetails?.name && (
                 <p className="w-max">
                   <strong>Name:</strong>{" "}
-                  {`${burialDetails.name.firstName} ${burialDetails.name.lastName}`}
+                  {`${burialDetails.name?.firstName} ${burialDetails.name?.lastName}`}
                 </p>
               )}
               {burialDetails?.representativeContactNumber && (
@@ -710,7 +710,7 @@ export default function ManageEvents() {
                   <Separator className="my-2" />
                   <p>
                     <strong>Name:</strong>{" "}
-                    {`${houseBlessingDetails.name.firstName} ${houseBlessingDetails.name.lastName}`}
+                    {`${houseBlessingDetails.name?.firstName} ${houseBlessingDetails.name?.lastName}`}
                   </p>
                   <p>
                     <strong>Contact Number:</strong>{" "}
