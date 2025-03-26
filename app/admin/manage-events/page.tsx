@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { formatRole } from "@/lib/format-role";
 
 export default function ManageEvents() {
   const [appointments, setAppointments] = useState([]);
@@ -244,7 +245,7 @@ export default function ManageEvents() {
     return participant
       ? // @ts-ignore
         `${participant?.firstName} ${participant?.lastName}`
-      : `Select ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+      : `Select ${formatRole(role)}`;
   };
 
   // @ts-ignore
