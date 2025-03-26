@@ -183,6 +183,7 @@ const ManageAccounts: React.FC = () => {
         address: newUser.address,
         contactNumber: newUser.contactNumber,
         role: newUser.role,
+        available: true,
       };
 
       await setDoc(doc(db, "users", user.uid), userData);
