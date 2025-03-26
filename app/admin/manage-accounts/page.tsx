@@ -169,6 +169,8 @@ const ManageAccounts: React.FC = () => {
     }
 
     try {
+      const currentUser = auth.currentUser;
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         newUser.email,
@@ -187,6 +189,13 @@ const ManageAccounts: React.FC = () => {
       };
 
       await setDoc(doc(db, "users", user.uid), userData);
+
+      await auth.signOut();
+
+      if (currentUser) {
+        await auth.updateCurrentUser(currentUser);
+      }
+
       toast({
         title: "Registered successfully",
       });
@@ -203,8 +212,14 @@ const ManageAccounts: React.FC = () => {
       fetchUsers();
     } catch (error) {
       console.error("Error creating user:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create user.",
+        variant: "destructive",
+      });
     }
   };
+
   const handleEditUser = async () => {
     if (!newUser.firstName || !newUser.lastName || !newUser.email) return;
 
